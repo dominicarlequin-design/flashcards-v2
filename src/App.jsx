@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
 const ALL_CATEGORY = 'All';
+const LEVEL_ORDER = ['Cats', 'Science', 'Geography', 'History', 'Tech'];
 
 const starterCards = [
   { id: 1, question: "How long do cats sleep per day?", answer: "12–16 hours on average", category: "Cats" },
@@ -53,7 +54,7 @@ const CATEGORY_EMOJI = { Cats:'🐱', Science:'🔬', Geography:'🌍', History:
 const getCat = (cat) => CATEGORY_COLORS[cat] || CATEGORY_COLORS.Custom;
 
 // ── views ──────────────────────────────────────────────────────────────────
-const VIEWS = { STUDY: 'study', STATS: 'stats', MANAGE: 'manage' };
+const VIEWS = { MAP: 'map', STUDY: 'study', STATS: 'stats', MANAGE: 'manage' };
 
 export default function App() {
   const [cards, setCards] = useState(() => {
@@ -63,15 +64,23 @@ export default function App() {
 
   // session results: { [cardId]: 'know' | 'dontknow' }
   const [results, setResults] = useState({});
+
+  // permanent mastery — persists across sessions, drives level unlocking
+  const [masteredIds, setMasteredIds] = useState(() => {
+    try { const s = localStorage.getItem('fc_mastered'); return s ? JSON.parse(s) : []; }
+    catch { return []; }
+  });
+
   const [streak, setStreak] = useState(() => {
     try { return JSON.parse(localStorage.getItem('fc_streak') || '{"count":0,"lastDate":""}'); }
     catch { return { count: 0, lastDate: '' }; }
   });
 
-  const [view, setView] = useState(VIEWS.STUDY);
+  const [view, setView] = useState(VIEWS.MAP);
   const [activeCategory, setActiveCategory] = useState(ALL_CATEGORY);
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
+  const [cameFromMap, setCameFromMap] = useState(false);
 
   // add card form
   const [showForm, setShowForm] = useState(false);
@@ -81,7 +90,7 @@ export default function App() {
   const [justAdded, setJustAdded] = useState(false);
 
   // edit modal
-  const [editCard, setEditCard] = useState(null); // card being edited
+  const [editCard, setEditCard] = useState(null);
   const [editQ, setEditQ] = useState('');
   const [editA, setEditA] = useState('');
   const [editCat, setEditCat] = useState('Custom');
@@ -107,9 +116,8 @@ export default function App() {
     reader.onload = (ev) => {
       try {
         const parsed = JSON.parse(ev.target.result);
-        const incoming = parsed.cards || parsed; // support array or {cards:[]}
+        const incoming = parsed.cards || parsed;
         if (!Array.isArray(incoming)) throw new Error('Invalid format');
-        // merge — skip dupes by question text
         const existingQs = new Set(cards.map(c => c.question.toLowerCase()));
         const newCards = incoming
           .filter(c => c.question && c.answer)
@@ -124,7 +132,7 @@ export default function App() {
       }
     };
     reader.readAsText(file);
-    e.target.value = ''; // reset input
+    e.target.value = '';
   };
 
   const categories = [ALL_CATEGORY, ...Array.from(new Set(cards.map(c => c.category)))];
@@ -134,6 +142,9 @@ export default function App() {
 
   // persist cards
   useEffect(() => { localStorage.setItem('fc_v3', JSON.stringify(cards)); }, [cards]);
+
+  // persist mastered ids
+  useEffect(() => { localStorage.setItem('fc_mastered', JSON.stringify(masteredIds)); }, [masteredIds]);
 
   // streak logic
   useEffect(() => {
@@ -176,6 +187,9 @@ export default function App() {
   // know / don't know
   const markCard = (cardId, result) => {
     setResults(prev => ({ ...prev, [cardId]: result }));
+    if (result === 'know') {
+      setMasteredIds(prev => prev.includes(cardId) ? prev : [...prev, cardId]);
+    }
     nextCard();
   };
 
@@ -188,7 +202,6 @@ export default function App() {
   const total = filtered.length;
   const pct = total > 0 ? Math.round((known / total) * 100) : 0;
 
-  // add card
   const addCard = () => {
     if (!newQ.trim() || !newA.trim()) return;
     const card = { id: Date.now(), question: newQ.trim(), answer: newA.trim(), category: newCat };
@@ -199,13 +212,11 @@ export default function App() {
     setTimeout(() => setJustAdded(false), 2000);
   };
 
-  // delete card
   const deleteCard = (id) => {
     setCards(prev => prev.filter(c => c.id !== id));
     setResults(prev => { const n = {...prev}; delete n[id]; return n; });
   };
 
-  // edit card
   const openEdit = (card) => {
     setEditCard(card);
     setEditQ(card.question);
@@ -221,7 +232,6 @@ export default function App() {
     setEditCard(null);
   };
 
-  // per-category mastery
   const getMastery = (cat) => {
     const catCards = cat === ALL_CATEGORY ? cards : cards.filter(c => c.category === cat);
     if (!catCards.length) return 0;
@@ -229,9 +239,36 @@ export default function App() {
     return Math.round((k / catCards.length) * 100);
   };
 
+  // ── LEVEL / MAP LOGIC ──────────────────────────────────────────────────
+  const isLevelComplete = (cat) => {
+    const catCards = cards.filter(c => c.category === cat);
+    if (!catCards.length) return false;
+    return catCards.every(c => masteredIds.includes(c.id));
+  };
+
+  // a level is unlocked if it's the first one, or the previous one is complete
+  const isLevelUnlocked = (levelIndex) => {
+    if (levelIndex === 0) return true;
+    return isLevelComplete(LEVEL_ORDER[levelIndex - 1]);
+  };
+
+  const enterLevel = (cat) => {
+    setActiveCategory(cat);
+    setResults({});
+    setIndex(0);
+    setFlipped(false);
+    setCameFromMap(true);
+    setView(VIEWS.STUDY);
+  };
+
+  const backToMap = () => {
+    setCameFromMap(false);
+    setView(VIEWS.MAP);
+  };
+
   const navBtn = (label, v) => (
     <button onClick={() => setView(v)} style={{
-      padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer',
+      padding: '8px 14px', borderRadius: '8px', border: 'none', cursor: 'pointer',
       background: view === v ? '#1e2538' : 'transparent',
       color: view === v ? '#e2e8f0' : '#475569',
       fontSize: '13px', fontWeight: view === v ? '600' : '400',
@@ -249,15 +286,67 @@ export default function App() {
             <p style={{ color:'#334155', fontSize:'12px', margin:0 }}>{cards.length} cards · 🔥 {streak.count} day streak</p>
           </div>
           <div style={{ display:'flex', gap:'4px', background:'#111827', borderRadius:'10px', padding:'4px' }}>
+            {navBtn('Map', VIEWS.MAP)}
             {navBtn('Study', VIEWS.STUDY)}
             {navBtn('Stats', VIEWS.STATS)}
             {navBtn('Cards', VIEWS.MANAGE)}
           </div>
         </div>
 
+        {/* ── MAP VIEW ── */}
+        {view === VIEWS.MAP && (
+          <div style={{ display:'flex', flexDirection:'column', alignItems:'center', paddingTop:'10px' }}>
+            {LEVEL_ORDER.map((cat, i) => {
+              const unlocked = isLevelUnlocked(i);
+              const complete = isLevelComplete(cat);
+              const cc = getCat(cat);
+              const offset = i % 2 === 0 ? '-40px' : '40px';
+              return (
+                <div key={cat} style={{ display:'flex', flexDirection:'column', alignItems:'center' }}>
+                  <button
+                    onClick={() => unlocked && enterLevel(cat)}
+                    disabled={!unlocked}
+                    style={{
+                      marginLeft: offset,
+                      width:'84px', height:'84px', borderRadius:'50%',
+                      border: unlocked ? `2.5px solid ${cc.accent}` : '2.5px solid #1e2538',
+                      background: complete ? cc.accent : unlocked ? cc.pill : '#111827',
+                      color: complete ? '#000' : unlocked ? cc.accent : '#334155',
+                      fontSize:'28px', cursor: unlocked ? 'pointer' : 'not-allowed',
+                      boxShadow: unlocked && !complete ? `0 0 24px ${cc.accent}55` : 'none',
+                      display:'flex', alignItems:'center', justifyContent:'center',
+                      position:'relative',
+                    }}
+                  >
+                    {complete ? '✓' : unlocked ? (CATEGORY_EMOJI[cat] || '✨') : '🔒'}
+                  </button>
+                  <p style={{
+                    marginLeft: offset, marginTop:'8px', marginBottom:'0',
+                    fontSize:'13px', fontWeight:'600',
+                    color: unlocked ? cc.accent : '#334155',
+                  }}>{cat}</p>
+                  {i < LEVEL_ORDER.length - 1 && (
+                    <div style={{ width:'3px', height:'36px', background: unlocked ? '#1e2538' : '#111827', margin:'8px 0' }} />
+                  )}
+                </div>
+              );
+            })}
+            <p style={{ color:'#475569', fontSize:'12px', marginTop:'20px', textAlign:'center' }}>
+              Master every card in a level to unlock the next
+            </p>
+          </div>
+        )}
+
         {/* ── STUDY VIEW ── */}
         {view === VIEWS.STUDY && (
           <>
+            {cameFromMap && (
+              <button onClick={backToMap} style={{
+                marginBottom:'14px', padding:'8px 14px', background:'#111827', border:'1px solid #1e2538',
+                borderRadius:'10px', color:'#94a3b8', fontSize:'13px', cursor:'pointer',
+              }}>← Back to Map</button>
+            )}
+
             {/* Category pills */}
             <div style={{ display:'flex', gap:'8px', overflowX:'auto', paddingBottom:'12px', marginBottom:'16px', scrollbarWidth:'none' }}>
               {categories.map(cat => {
@@ -265,7 +354,7 @@ export default function App() {
                 const cc = getCat(cat);
                 const m = getMastery(cat);
                 return (
-                  <button key={cat} onClick={() => setActiveCategory(cat)} style={{
+                  <button key={cat} onClick={() => { setActiveCategory(cat); setCameFromMap(false); }} style={{
                     flexShrink:0, padding:'6px 14px', borderRadius:'999px', cursor:'pointer',
                     border: isActive ? `1.5px solid ${cc.accent}` : '1.5px solid #1e2538',
                     background: isActive ? cc.pill : 'transparent',
@@ -309,7 +398,6 @@ export default function App() {
                 transition:'transform 0.5s cubic-bezier(0.23,1,0.32,1)',
                 transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
               }}>
-                {/* Front */}
                 <div style={{
                   position:'absolute', width:'100%', height:'100%', backfaceVisibility:'hidden',
                   borderRadius:'16px', background:`linear-gradient(145deg,${colors.bg},#0a0a0f)`,
@@ -324,7 +412,6 @@ export default function App() {
                     {currentCard?.question}
                   </p>
                 </div>
-                {/* Back */}
                 <div style={{
                   position:'absolute', width:'100%', height:'100%', backfaceVisibility:'hidden',
                   borderRadius:'16px', background:`linear-gradient(145deg,${colors.bg},#0a0a0f)`,
@@ -342,213 +429,7 @@ export default function App() {
 
             <p style={{ textAlign:'center', color:'#1e2538', fontSize:'12px', marginBottom:'16px' }}>Tap to flip · Arrow keys to navigate</p>
 
-            {/* Know / Don't Know — shown after flip */}
             {flipped && (
               <div style={{ display:'flex', gap:'10px', marginBottom:'16px' }}>
                 <button onClick={() => markCard(currentCard.id, 'dontknow')} style={{
-                  flex:1, padding:'13px', borderRadius:'12px', border:'1.5px solid #f87171',
-                  background:'#1a0f0f', color:'#f87171', fontSize:'15px', fontWeight:'600', cursor:'pointer',
-                }}>✗ Review again</button>
-                <button onClick={() => markCard(currentCard.id, 'know')} style={{
-                  flex:1, padding:'13px', borderRadius:'12px', border:'none',
-                  background:'#4ade80', color:'#000', fontSize:'15px', fontWeight:'700', cursor:'pointer',
-                }}>✓ Got it</button>
-              </div>
-            )}
-
-            {/* Nav buttons */}
-            <div style={{ display:'flex', gap:'8px', justifyContent:'center', marginBottom:'28px' }}>
-              {[{l:'← Prev',fn:prevCard},{l:'Next →',fn:nextCard},{l:'🔀',fn:()=>{
-                setFlipped(false);
-                const s=[...cards].sort(()=>Math.random()-0.5);
-                setCards(s); setIndex(0);
-              }}].map(({l,fn})=>(
-                <button key={l} onClick={fn} style={{ padding:'10px 18px', background:'#111827', border:'1px solid #1e2538', borderRadius:'10px', color:'#94a3b8', fontSize:'14px', cursor:'pointer', fontWeight:'500' }}>{l}</button>
-              ))}
-            </div>
-
-            {/* Add card */}
-            <div style={{ borderTop:'1px solid #1e2538', paddingTop:'20px' }}>
-              <button onClick={() => setShowForm(f=>!f)} style={{
-                width:'100%', padding:'12px', background: showForm?'#1e2538':'transparent',
-                border:'1px solid #1e2538', borderRadius:'12px',
-                color: showForm?'#e2e8f0':'#64748b', fontSize:'14px', fontWeight:'600', cursor:'pointer',
-                marginBottom: showForm?'16px':0,
-              }}>
-                {showForm ? '✕ Close' : '＋ Add a Card'}
-              </button>
-              {showForm && (
-                <div>
-                  <input value={newQ} onChange={e=>setNewQ(e.target.value)} placeholder="Question..." style={iS} />
-                  <input value={newA} onChange={e=>setNewA(e.target.value)} placeholder="Answer..." style={iS} />
-                  <p style={{ fontSize:'12px', color:'#64748b', marginBottom:'8px', fontWeight:'600', letterSpacing:'0.5px' }}>CATEGORY</p>
-                  <div style={{ display:'flex', gap:'6px', flexWrap:'wrap', marginBottom:'14px' }}>
-                    {['Cats','Science','Geography','History','Tech','Custom'].map(cat => {
-                      const cc=getCat(cat); const isA=newCat===cat;
-                      return <button key={cat} onClick={()=>setNewCat(cat)} style={{
-                        padding:'6px 12px', borderRadius:'999px', fontSize:'12px', cursor:'pointer',
-                        border: isA?`1.5px solid ${cc.accent}`:'1.5px solid #1e2538',
-                        background: isA?cc.pill:'transparent', color: isA?cc.accent:'#475569', fontWeight: isA?'600':'400',
-                      }}>{CATEGORY_EMOJI[cat]} {cat}</button>;
-                    })}
-                  </div>
-                  <button onClick={addCard} style={{ width:'100%', padding:'13px', background:getCat(newCat).accent, border:'none', borderRadius:'12px', color:'#000', fontWeight:'700', fontSize:'15px', cursor:'pointer' }}>
-                    + Add Card
-                  </button>
-                  {justAdded && <p style={{ textAlign:'center', color:'#4ade80', fontSize:'13px', marginTop:'10px' }}>✅ Card added!</p>}
-                </div>
-              )}
-            </div>
-          </>
-        )}
-
-        {/* ── STATS VIEW ── */}
-        {view === VIEWS.STATS && (
-          <div>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'10px', marginBottom:'24px' }}>
-              {[
-                { label:'Known', value:known, color:'#4ade80' },
-                { label:'Review', value:dontKnow, color:'#f87171' },
-                { label:'Streak', value:`${streak.count}d`, color:'#fbbf24' },
-              ].map(({label,value,color})=>(
-                <div key={label} style={{ background:'#111827', borderRadius:'12px', padding:'16px', textAlign:'center', border:'1px solid #1e2538' }}>
-                  <p style={{ fontSize:'26px', fontWeight:'700', color, margin:'0 0 4px' }}>{value}</p>
-                  <p style={{ fontSize:'12px', color:'#475569', margin:0 }}>{label}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Overall progress bar */}
-            <div style={{ background:'#111827', borderRadius:'12px', padding:'16px', marginBottom:'20px', border:'1px solid #1e2538' }}>
-              <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'8px' }}>
-                <span style={{ fontSize:'13px', color:'#94a3b8' }}>Session progress</span>
-                <span style={{ fontSize:'13px', fontWeight:'600', color:'#4ade80' }}>{pct}%</span>
-              </div>
-              <div style={{ height:'8px', background:'#1e2538', borderRadius:'999px', overflow:'hidden' }}>
-                <div style={{ width:`${pct}%`, height:'100%', background:'linear-gradient(90deg,#4ade80,#22c55e)', borderRadius:'999px', transition:'width 0.4s' }} />
-              </div>
-              <p style={{ fontSize:'12px', color:'#334155', margin:'8px 0 0' }}>{sessionCards.length} of {total} cards answered</p>
-            </div>
-
-            {/* Per-category breakdown */}
-            <p style={{ fontSize:'13px', fontWeight:'600', color:'#64748b', letterSpacing:'0.5px', marginBottom:'12px' }}>BY CATEGORY</p>
-            {categories.filter(c=>c!==ALL_CATEGORY).map(cat => {
-              const cc = getCat(cat);
-              const catCards = cards.filter(c=>c.category===cat);
-              const k = catCards.filter(c=>results[c.id]==='know').length;
-              const dk = catCards.filter(c=>results[c.id]==='dontknow').length;
-              const m = catCards.length > 0 ? Math.round((k/catCards.length)*100) : 0;
-              return (
-                <div key={cat} style={{ background:'#111827', borderRadius:'12px', padding:'14px 16px', marginBottom:'10px', border:`1px solid ${cc.accent}22` }}>
-                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'8px' }}>
-                    <span style={{ fontSize:'14px', fontWeight:'600', color:cc.accent }}>{CATEGORY_EMOJI[cat]} {cat}</span>
-                    <span style={{ fontSize:'13px', color:'#64748b' }}>{k}/{catCards.length} · {m}%</span>
-                  </div>
-                  <div style={{ height:'5px', background:'#1e2538', borderRadius:'999px', overflow:'hidden' }}>
-                    <div style={{ width:`${m}%`, height:'100%', background:cc.accent, borderRadius:'999px', transition:'width 0.4s' }} />
-                  </div>
-                  {dk > 0 && <p style={{ fontSize:'11px', color:'#f87171', margin:'6px 0 0' }}>{dk} card{dk>1?'s':''} to review</p>}
-                </div>
-              );
-            })}
-
-            <button onClick={resetSession} style={{ width:'100%', marginTop:'12px', padding:'13px', background:'transparent', border:'1px solid #1e2538', borderRadius:'12px', color:'#64748b', fontSize:'14px', cursor:'pointer' }}>
-              🔄 Reset session
-            </button>
-          </div>
-        )}
-
-        {/* ── MANAGE VIEW ── */}
-        {view === VIEWS.MANAGE && (
-          <div>
-            {/* Export / Import */}
-            <div style={{ display:'flex', gap:'8px', marginBottom:'12px' }}>
-              <button onClick={exportCards} style={{
-                flex:1, padding:'11px', background:'#111827', border:'1px solid #1e2538',
-                borderRadius:'10px', color:'#94a3b8', fontSize:'13px', fontWeight:'600', cursor:'pointer',
-              }}>⬇️ Export JSON</button>
-              <label style={{
-                flex:1, padding:'11px', background:'#111827', border:'1px solid #1e2538',
-                borderRadius:'10px', color:'#94a3b8', fontSize:'13px', fontWeight:'600', cursor:'pointer',
-                textAlign:'center',
-              }}>
-                ⬆️ Import JSON
-                <input type="file" accept=".json" onChange={importCards} style={{ display:'none' }} />
-              </label>
-            </div>
-            {importMsg && <p style={{ textAlign:'center', fontSize:'13px', color: importMsg.startsWith('✅')?'#4ade80':'#f87171', marginBottom:'10px' }}>{importMsg}</p>}
-            <p style={{ fontSize:'13px', color:'#64748b', marginBottom:'16px' }}>{cards.length} total cards</p>
-
-            {/* Filter */}
-            <div style={{ display:'flex', gap:'6px', overflowX:'auto', paddingBottom:'12px', marginBottom:'16px', scrollbarWidth:'none' }}>
-              {categories.map(cat=>{
-                const isA=cat===activeCategory; const cc=getCat(cat);
-                return <button key={cat} onClick={()=>setActiveCategory(cat)} style={{
-                  flexShrink:0, padding:'5px 12px', borderRadius:'999px', cursor:'pointer', whiteSpace:'nowrap',
-                  border: isA?`1.5px solid ${cc.accent}`:'1.5px solid #1e2538',
-                  background: isA?cc.pill:'transparent',
-                  color: isA?cc.accent:'#64748b', fontSize:'12px', fontWeight: isA?'600':'400',
-                }}>{cat===ALL_CATEGORY?'All':`${CATEGORY_EMOJI[cat]||'✨'} ${cat}`}</button>;
-              })}
-            </div>
-
-            {filtered.map(card => {
-              const cc = getCat(card.category);
-              const res = results[card.id];
-              return (
-                <div key={card.id} style={{ background:'#111827', borderRadius:'12px', padding:'14px 16px', marginBottom:'10px', border:`1px solid ${res==='know'?'#4ade8033':res==='dontknow'?'#f8717133':'#1e2538'}` }}>
-                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:'10px' }}>
-                    <div style={{ flex:1 }}>
-                      <span style={{ fontSize:'11px', color:cc.accent, fontWeight:'600', letterSpacing:'0.5px' }}>{CATEGORY_EMOJI[card.category]} {card.category}</span>
-                      <p style={{ fontSize:'14px', color:'#e2e8f0', margin:'4px 0 2px', fontWeight:'500' }}>{card.question}</p>
-                      <p style={{ fontSize:'13px', color:'#64748b', margin:0 }}>{card.answer}</p>
-                    </div>
-                    <div style={{ display:'flex', gap:'6px', flexShrink:0 }}>
-                      <button onClick={()=>openEdit(card)} style={{ padding:'6px 10px', background:'#1e2538', border:'none', borderRadius:'8px', color:'#94a3b8', fontSize:'12px', cursor:'pointer' }}>Edit</button>
-                      <button onClick={()=>deleteCard(card.id)} style={{ padding:'6px 10px', background:'#1a0f0f', border:'1px solid #f8717133', borderRadius:'8px', color:'#f87171', fontSize:'12px', cursor:'pointer' }}>✕</button>
-                    </div>
-                  </div>
-                  {res && <p style={{ fontSize:'11px', color: res==='know'?'#4ade80':'#f87171', margin:'8px 0 0' }}>{res==='know'?'✓ Known this session':'✗ Needs review'}</p>}
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        <p style={{ textAlign:'center', color:'#1e2538', fontSize:'11px', marginTop:'28px' }}>Saved automatically</p>
-      </div>
-
-      {/* ── EDIT MODAL ── */}
-      {editCard && (
-        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.8)', display:'flex', alignItems:'center', justifyContent:'center', padding:'20px', zIndex:100 }}>
-          <div style={{ background:'#111827', borderRadius:'16px', padding:'24px', width:'100%', maxWidth:'420px', border:'1px solid #1e2538' }}>
-            <h3 style={{ margin:'0 0 16px', fontSize:'16px', fontWeight:'700' }}>Edit Card</h3>
-            <input value={editQ} onChange={e=>setEditQ(e.target.value)} placeholder="Question..." style={iS} />
-            <input value={editA} onChange={e=>setEditA(e.target.value)} placeholder="Answer..." style={iS} />
-            <p style={{ fontSize:'12px', color:'#64748b', marginBottom:'8px', fontWeight:'600' }}>CATEGORY</p>
-            <div style={{ display:'flex', gap:'6px', flexWrap:'wrap', marginBottom:'16px' }}>
-              {['Cats','Science','Geography','History','Tech','Custom'].map(cat=>{
-                const cc=getCat(cat); const isA=editCat===cat;
-                return <button key={cat} onClick={()=>setEditCat(cat)} style={{
-                  padding:'6px 10px', borderRadius:'999px', fontSize:'12px', cursor:'pointer',
-                  border: isA?`1.5px solid ${cc.accent}`:'1.5px solid #1e2538',
-                  background: isA?cc.pill:'transparent', color: isA?cc.accent:'#475569', fontWeight: isA?'600':'400',
-                }}>{CATEGORY_EMOJI[cat]} {cat}</button>;
-              })}
-            </div>
-            <div style={{ display:'flex', gap:'10px' }}>
-              <button onClick={()=>setEditCard(null)} style={{ flex:1, padding:'12px', background:'transparent', border:'1px solid #1e2538', borderRadius:'10px', color:'#64748b', cursor:'pointer', fontSize:'14px' }}>Cancel</button>
-              <button onClick={saveEdit} style={{ flex:1, padding:'12px', background:'#818cf8', border:'none', borderRadius:'10px', color:'#000', fontWeight:'700', cursor:'pointer', fontSize:'14px' }}>Save</button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-const iS = {
-  width:'100%', padding:'12px 16px', background:'#0a0a0f', border:'1px solid #1e2538',
-  borderRadius:'10px', color:'#e2e8f0', fontSize:'15px', marginBottom:'12px',
-  boxSizing:'border-box', outline:'none',
-};
+                  flex:1, pad
