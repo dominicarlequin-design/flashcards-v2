@@ -69,9 +69,9 @@ function useIsDesktop() {
 
 // wide desktop (e.g. MacBook Pro 14"/16" — 1512px+/1728px+ viewports)
 function useIsLarge() {
-  const [isLarge, setIsLarge] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 1280);
+  const [isLarge, setIsLarge] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 1024);
   useEffect(() => {
-    const fn = () => setIsLarge(window.innerWidth >= 1280);
+    const fn = () => setIsLarge(window.innerWidth >= 1024);
     window.addEventListener('resize', fn);
     return () => window.removeEventListener('resize', fn);
   }, []);
@@ -80,9 +80,9 @@ function useIsLarge() {
 
 // very wide desktop (MacBook Pro 16" and bigger external displays)
 function useIsXLarge() {
-  const [isXLarge, setIsXLarge] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 1700);
+  const [isXLarge, setIsXLarge] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 1440);
   useEffect(() => {
-    const fn = () => setIsXLarge(window.innerWidth >= 1700);
+    const fn = () => setIsXLarge(window.innerWidth >= 1440);
     window.addEventListener('resize', fn);
     return () => window.removeEventListener('resize', fn);
   }, []);
