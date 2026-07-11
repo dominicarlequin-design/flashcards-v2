@@ -1,19 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 
 const ALL_CATEGORY = 'All';
-const LEVEL_ORDER = ['Cats', 'Science', 'Geography', 'History', 'Tech'];
+const LEVEL_ORDER = ['Science', 'Geography', 'History', 'Tech'];
 
 const starterCards = [
-  { id: 1, question: "How long do cats sleep per day?", answer: "12–16 hours on average", category: "Cats" },
-  { id: 2, question: "What is a group of cats called?", answer: "A clowder", category: "Cats" },
-  { id: 3, question: "How many toes does a normal cat have?", answer: "18 toes total", category: "Cats" },
-  { id: 4, question: "What does a slow blink mean?", answer: "Trust and affection", category: "Cats" },
-  { id: 5, question: "Can cats see in complete darkness?", answer: "No — but need 6x less light than humans", category: "Cats" },
-  { id: 6, question: "What is a polydactyl cat?", answer: "A cat born with extra toes", category: "Cats" },
-  { id: 7, question: "Why do cats knead?", answer: "Comfort behavior from kittenhood", category: "Cats" },
-  { id: 8, question: "How fast can a cat run?", answer: "Up to 30 mph", category: "Cats" },
-  { id: 9, question: "Tail straight up means...?", answer: "Happy and confident", category: "Cats" },
-  { id: 10, question: "Do cats have a dominant paw?", answer: "Yes — left or right pawed", category: "Cats" },
   { id: 11, question: "What is the powerhouse of the cell?", answer: "The mitochondria", category: "Science" },
   { id: 12, question: "How many bones are in the human body?", answer: "206 bones (adults)", category: "Science" },
   { id: 13, question: "What planet is closest in size to Earth?", answer: "Venus", category: "Science" },
@@ -43,14 +33,13 @@ const starterCards = [
 ];
 
 const CATEGORY_COLORS = {
-  Cats:      { bg: '#2a1f3d', accent: '#c084fc', pill: '#3d1f5c' },
   Science:   { bg: '#0d2137', accent: '#38bdf8', pill: '#0c3251' },
   Geography: { bg: '#0d2a1a', accent: '#4ade80', pill: '#0a3320' },
   History:   { bg: '#2d1b0e', accent: '#fb923c', pill: '#4a2800' },
   Tech:      { bg: '#0f1f2d', accent: '#818cf8', pill: '#1e2a4a' },
   Custom:    { bg: '#1e1a14', accent: '#fbbf24', pill: '#362d10' },
 };
-const CATEGORY_EMOJI = { Cats:'🐱', Science:'🔬', Geography:'🌍', History:'🏛️', Tech:'💻', Custom:'✨' };
+const CATEGORY_EMOJI = { Science:'🔬', Geography:'🌍', History:'🏛️', Tech:'💻', Custom:'✨' };
 const getCat = (cat) => CATEGORY_COLORS[cat] || CATEGORY_COLORS.Custom;
 
 // ── views ──────────────────────────────────────────────────────────────────
