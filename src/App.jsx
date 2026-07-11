@@ -84,7 +84,12 @@ export default function App() {
   const isXLarge = useIsXLarge();
 
   const [cards, setCards] = useState(() => {
-    try { const s = localStorage.getItem('fc_v3'); return s ? JSON.parse(s) : starterCards; }
+    try {
+      const s = localStorage.getItem('fc_v3');
+      const parsed = s ? JSON.parse(s) : starterCards;
+      // migration: strip any legacy 'Cats' category cards from persisted data
+      return parsed.filter(c => c.category !== 'Cats');
+    }
     catch { return starterCards; }
   });
 
