@@ -1,45 +1,104 @@
 import { useState, useEffect, useCallback } from 'react';
 
 const ALL_CATEGORY = 'All';
-const LEVEL_ORDER = ['Science', 'Geography', 'History', 'Tech'];
+const LEVEL_ORDER = ['JavaScript', 'Python', 'Java', 'C++', 'Go', 'React'];
 
 const starterCards = [
-  { id: 11, question: "What is the powerhouse of the cell?", answer: "The mitochondria", category: "Science" },
-  { id: 12, question: "How many bones are in the human body?", answer: "206 bones (adults)", category: "Science" },
-  { id: 13, question: "What planet is closest in size to Earth?", answer: "Venus", category: "Science" },
-  { id: 14, question: "What gas do plants absorb from the air?", answer: "Carbon dioxide (CO₂)", category: "Science" },
-  { id: 15, question: "How many elements are on the periodic table?", answer: "118 elements", category: "Science" },
-  { id: 16, question: "What is the speed of light?", answer: "~299,792 km per second", category: "Science" },
-  { id: 17, question: "What is DNA short for?", answer: "Deoxyribonucleic acid", category: "Science" },
-  { id: 18, question: "What layer of Earth do we live on?", answer: "The crust", category: "Science" },
-  { id: 19, question: "What is the longest river in the world?", answer: "The Nile (6,650 km)", category: "Geography" },
-  { id: 20, question: "What is the smallest country in the world?", answer: "Vatican City", category: "Geography" },
-  { id: 21, question: "Which continent has the most countries?", answer: "Africa (54 countries)", category: "Geography" },
-  { id: 22, question: "What ocean is the largest?", answer: "The Pacific Ocean", category: "Geography" },
-  { id: 23, question: "What is the capital of Australia?", answer: "Canberra", category: "Geography" },
-  { id: 24, question: "Which country has the most natural lakes?", answer: "Canada", category: "Geography" },
-  { id: 25, question: "In what year did World War II end?", answer: "1945", category: "History" },
-  { id: 26, question: "Who was the first US president?", answer: "George Washington", category: "History" },
-  { id: 27, question: "What ancient wonder was in Alexandria?", answer: "The Great Library / Lighthouse", category: "History" },
-  { id: 28, question: "What year did the Berlin Wall fall?", answer: "1989", category: "History" },
-  { id: 29, question: "Who invented the telephone?", answer: "Alexander Graham Bell (1876)", category: "History" },
-  { id: 30, question: "What empire was ruled by Julius Caesar?", answer: "The Roman Empire", category: "History" },
-  { id: 31, question: "What does CPU stand for?", answer: "Central Processing Unit", category: "Tech" },
-  { id: 32, question: "What language is React written in?", answer: "JavaScript", category: "Tech" },
-  { id: 33, question: "What does HTTP stand for?", answer: "HyperText Transfer Protocol", category: "Tech" },
-  { id: 34, question: "What is an API?", answer: "A way for apps to communicate with each other", category: "Tech" },
-  { id: 35, question: "What does CSS stand for?", answer: "Cascading Style Sheets", category: "Tech" },
-  { id: 36, question: "What is a 'bug' in coding?", answer: "An error or flaw in the code", category: "Tech" },
+  { id: 101, question: "What year was JavaScript created?", answer: "1995", category: "JavaScript" },
+  { id: 102, question: "Who created JavaScript?", answer: "Brendan Eich", category: "JavaScript" },
+  { id: 103, question: "What keyword declares a block-scoped variable?", answer: "let (or const)", category: "JavaScript" },
+  { id: 104, question: "What does '===' check that '==' doesn't?", answer: "Type, in addition to value", category: "JavaScript" },
+  { id: 105, question: "What object represents the browser's document?", answer: "The DOM", category: "JavaScript" },
+  { id: 106, question: "What is a Promise used for?", answer: "Handling asynchronous operations", category: "JavaScript" },
+  { id: 107, question: "What runtime lets JavaScript run outside the browser?", answer: "Node.js", category: "JavaScript" },
+  { id: 108, question: "What method converts JSON text into an object?", answer: "JSON.parse()", category: "JavaScript" },
+  { id: 201, question: "Who created Python?", answer: "Guido van Rossum", category: "Python" },
+  { id: 202, question: "What year was Python first released?", answer: "1991", category: "Python" },
+  { id: 203, question: "What symbol starts a comment in Python?", answer: "#", category: "Python" },
+  { id: 204, question: "What keyword defines a function in Python?", answer: "def", category: "Python" },
+  { id: 205, question: "What data structure uses curly braces {} by default?", answer: "A dictionary (dict)", category: "Python" },
+  { id: 206, question: "What tool manages Python virtual environments?", answer: "venv (or virtualenv)", category: "Python" },
+  { id: 207, question: "What does PEP stand for?", answer: "Python Enhancement Proposal", category: "Python" },
+  { id: 208, question: "What popular framework is used for Python web apps?", answer: "Django (or Flask)", category: "Python" },
+  { id: 301, question: "Who created Java?", answer: "James Gosling", category: "Java" },
+  { id: 302, question: "What year was Java released?", answer: "1995", category: "Java" },
+  { id: 303, question: "What does JVM stand for?", answer: "Java Virtual Machine", category: "Java" },
+  { id: 304, question: "What keyword is used to inherit a class in Java?", answer: "extends", category: "Java" },
+  { id: 305, question: "What method is the entry point of a Java program?", answer: "public static void main(String[] args)", category: "Java" },
+  { id: 306, question: "What company originally developed Java?", answer: "Sun Microsystems", category: "Java" },
+  { id: 307, question: "What build tool commonly manages Java dependencies?", answer: "Maven (or Gradle)", category: "Java" },
+  { id: 401, question: "Who created C++?", answer: "Bjarne Stroustrup", category: "C++" },
+  { id: 402, question: "What year was C++ introduced?", answer: "1985", category: "C++" },
+  { id: 403, question: "What language is C++ an extension of?", answer: "C", category: "C++" },
+  { id: 404, question: "What keyword creates a class in C++?", answer: "class", category: "C++" },
+  { id: 405, question: "What operator allocates memory dynamically in C++?", answer: "new", category: "C++" },
+  { id: 406, question: "What does STL stand for?", answer: "Standard Template Library", category: "C++" },
+  { id: 501, question: "What company created Go?", answer: "Google", category: "Go" },
+  { id: 502, question: "What year was Go released?", answer: "2009", category: "Go" },
+  { id: 503, question: "What keyword declares a variable in Go?", answer: "var (or :=)", category: "Go" },
+  { id: 504, question: "What does Go use instead of classes for behavior?", answer: "Structs and interfaces", category: "Go" },
+  { id: 505, question: "What keyword starts a lightweight concurrent thread in Go?", answer: "go", category: "Go" },
+  { id: 506, question: "What is Go's package manager/build tool called?", answer: "go modules (go mod)", category: "Go" },
+  { id: 601, question: "Who created React?", answer: "Jordan Walke (at Facebook)", explain: "A guy named Jordan Walke made it! He worked at a company called Facebook. Imagine you build a cool toy — that's what he did, but with code instead of plastic!", category: "React" },
+  { id: 602, question: "What year was React open-sourced?", answer: "2013", explain: "That means Facebook said 'hey everyone, you can use our toy too, for free!' Like sharing your favorite crayons with the whole class.", category: "React" },
+  { id: 603, question: "What syntax extension lets you write HTML-like code in JS?", answer: "JSX", explain: "It's like mixing peanut butter (HTML) and jelly (JavaScript) into one yummy sandwich so you can write them together in the same spot.", category: "React" },
+  { id: 604, question: "What hook lets you add state to a function component?", answer: "useState", explain: "Think of it like a magic backpack. You put a toy (a value) in the backpack, and whenever you swap the toy, React notices and redraws the picture on screen.", category: "React" },
+  { id: 605, question: "What hook runs side effects after render?", answer: "useEffect", explain: "It's like a little helper robot that waits until you're done drawing your picture, then runs off to do a chore — like fetching juice from the fridge — after the picture is on the wall.", category: "React" },
+  { id: 606, question: "What virtual structure does React use to optimize DOM updates?", answer: "The Virtual DOM", explain: "Imagine you have a pretend drawing on scratch paper before you draw on the REAL wall. React scribbles on scratch paper first, checks what changed, then only fixes the real wall where needed — way faster than redrawing everything!", category: "React" },
+  { id: 607, question: "What prop must every item in a list have?", answer: "A unique key", explain: "It's like giving every kid in class their own name tag, so the teacher (React) doesn't mix up who is who when the line moves around.", category: "React" },
+  { id: 608, question: "What company maintains React?", answer: "Meta (Facebook)", explain: "That's the new name for Facebook! Like when your favorite toy company changes its name but still makes your favorite toys.", category: "React" },
+  { id: 609, question: "What do you call a function that returns JSX?", answer: "A (function) component", explain: "It's like a little recipe card — you follow the steps (the function) and out pops a yummy cookie (the UI) at the end!", category: "React" },
+  { id: 610, question: "What hook memoizes an expensive calculation?", answer: "useMemo", explain: "Imagine solving a REALLY hard math puzzle once, writing the answer on a sticky note, and just peeking at the sticky note next time instead of solving it all over again. Saves your brain energy!", category: "React" },
+  { id: 611, question: "What hook memoizes a function reference?", answer: "useCallback", explain: "It's like keeping the SAME toy in your hand instead of grabbing a brand new copy of it every single time — so your friends (other parts of the app) recognize it's the same toy and don't get confused.", category: "React" },
+  { id: 612, question: "What hook accesses a value from Context?", answer: "useContext", explain: "Imagine a walkie-talkie channel the whole family shares. Instead of passing a note hand-to-hand through every room, everyone can just listen to the same channel and hear the message instantly.", category: "React" },
+  { id: 613, question: "What hook gives direct access to a DOM node or persists a mutable value?", answer: "useRef", explain: "It's like a sticky note you can write on and peek at anytime, but writing on it does NOT make React redraw the picture — it's your own secret notepad.", category: "React" },
+  { id: 614, question: "What is 'props' short for?", answer: "Properties", explain: "Think of props like a gift box a parent hands to a kid. The parent (component) packs stuff inside, and the kid (child component) gets to use what's in the box, but can't change what's inside.", category: "React" },
+  { id: 615, question: "Are props mutable or immutable inside a component?", answer: "Immutable (read-only)", explain: "It's like getting a birthday card: you can READ it and enjoy it, but you can't scribble new words into someone else's card.", category: "React" },
+  { id: 616, question: "What term describes data flowing from parent to child only?", answer: "One-way (unidirectional) data flow", explain: "Picture water flowing down a slide — it only goes one direction, from the top (parent) down to the bottom (child), never back up.", category: "React" },
+  { id: 617, question: "What special prop lets a component render nested elements?", answer: "children", explain: "It's like a big empty gift box shape — whatever toy you slide inside it (any nested stuff), the box just displays it right there in the middle.", category: "React" },
+  { id: 618, question: "What is a 'controlled component'?", answer: "A form element whose value is driven by React state", explain: "A form (like a text box) where REACT is the boss of what's typed in it — like a puppet where React is holding all the strings and deciding exactly what shows.", category: "React" },
+  { id: 619, question: "What is an 'uncontrolled component'?", answer: "A form element that manages its own state via the DOM", explain: "A form that does its own thing without React bossing it around every keystroke — like a toy car that drives on its own without you steering it the whole time.", category: "React" },
+  { id: 620, question: "What React API lets you share data without prop drilling?", answer: "Context API", explain: "Like a loudspeaker in a school — instead of whispering a message kid-to-kid down a long hallway, you just announce it once and every room hears it.", category: "React" },
+  { id: 621, question: "What term describes passing props through many layers unnecessarily?", answer: "Prop drilling", explain: "Imagine passing a note through 10 friends standing in a line just so the 10th friend gets it — tiring and silly when you could just shout it instead (that's why Context helps)!", category: "React" },
+  { id: 622, question: "What lifecycle concept do useEffect's cleanup functions handle?", answer: "Unmounting / cleanup", explain: "It's like cleaning up your blocks and putting toys away BEFORE you leave the room, so nothing's left making a mess after you're gone.", category: "React" },
+  { id: 623, question: "What array param in useEffect controls when it re-runs?", answer: "The dependency array", explain: "It's like a checklist — useEffect only runs its little chore again if something on the checklist actually changed. No changes? No re-run — it just naps.", category: "React" },
+  { id: 624, question: "What is 'reconciliation' in React?", answer: "The diffing process that updates the real DOM to match the Virtual DOM", explain: "React compares the OLD scratch-paper drawing to the NEW scratch-paper drawing, spots exactly what's different, and then only touches those exact spots on the real wall — super efficient!", category: "React" },
+  { id: 625, question: "What algorithm powers React's reconciliation?", answer: "The diffing algorithm (Fiber)", explain: "Think of it like a detective comparing two 'spot the difference' pictures super fast to find just the tiny changes.", category: "React" },
+  { id: 626, question: "What is React Fiber?", answer: "React's internal reconciliation engine/rendering architecture", explain: "It's React's inner engine — like the engine inside a toy car. You don't see it, but it's what makes everything move, pause, and restart smoothly without freezing up.", category: "React" },
+  { id: 627, question: "What do you call a component defined as a JavaScript class extending React.Component?", answer: "A class component", explain: "It's an older, fancier way to build a component — like using a big recipe book with lots of chapters instead of one quick index card (that's what function components are).", category: "React" },
+  { id: 628, question: "What method renders UI in a class component?", answer: "render()", explain: "It's the special chapter in that recipe book that says 'here's exactly what to draw on the picture' — every class component MUST have this chapter.", category: "React" },
+  { id: 629, question: "What lifecycle method runs once after a class component mounts?", answer: "componentDidMount", explain: "It's like the moment right after you finish building a Lego tower — 'ta-da, I'm done building, now let's go play with it!'", category: "React" },
+  { id: 630, question: "What lifecycle method runs right before a component unmounts?", answer: "componentWillUnmount", explain: "It's the moment right before your Lego tower gets knocked down — your last chance to save pieces or say goodbye before it's gone.", category: "React" },
+  { id: 631, question: "What term describes a component with no internal state?", answer: "A stateless (presentational) component", explain: "Like a poster on the wall — it just shows a picture, it doesn't remember anything or change on its own.", category: "React" },
+  { id: 632, question: "What pattern lets you reuse component logic by passing a function as a prop?", answer: "Render props", explain: "Imagine handing a friend instructions (a function) instead of a finished toy, and they use YOUR instructions to build their own version of it.", category: "React" },
+  { id: 633, question: "What was the pattern for sharing logic before hooks existed?", answer: "Higher-Order Components (HOCs)", explain: "Think of it like wrapping a plain gift (component) inside fancy wrapping paper (another component) that adds extra powers to it.", category: "React" },
+  { id: 634, question: "What is a 'custom hook'?", answer: "A reusable function starting with 'use' that calls other hooks", explain: "It's a hook YOU make yourself! Like inventing your own secret recipe by mixing other recipes (hooks) together into one reusable snack.", category: "React" },
+  { id: 635, question: "What does 'declarative UI' mean in React's philosophy?", answer: "Describing what the UI should look like, not how to update it step by step", explain: "You just say WHAT you want ('I want a red button') instead of giving step-by-step directions on HOW to draw it pixel by pixel. React figures out the 'how' part for you!", category: "React" },
+  { id: 636, question: "What tool bundles/serves modern React apps quickly in dev?", answer: "Vite (or Webpack)", explain: "Think of it like a super-fast helper that gathers all your toy pieces (files) and puts them together neatly so your app can run in the browser.", category: "React" },
+  { id: 637, question: "What React feature lets components be split and loaded on demand?", answer: "Code splitting (React.lazy)", explain: "It's like only bringing out the toys you need to play with RIGHT NOW, instead of dragging your entire toybox into the room all at once.", category: "React" },
+  { id: 638, question: "What component wraps lazy-loaded components to show a fallback?", answer: "Suspense", explain: "It's like holding up a 'please wait, loading...' sign while your friend (the lazy component) is still getting their toy out of the closet.", category: "React" },
+  { id: 639, question: "What hook lets you opt a value out of a low-priority re-render?", answer: "useTransition", explain: "It's like telling React 'hey, this update isn't super urgent, feel free to finish more important stuff first and get to this a little later.'", category: "React" },
+  { id: 640, question: "What React 18 feature batches multiple state updates automatically?", answer: "Automatic batching", explain: "Instead of running to the store five separate times for five snacks, React waits, bundles all five snack requests together, and makes just ONE trip — way more efficient!", category: "React" },
+  { id: 641, question: "What is a 'fragment' used for in React?", answer: "Grouping children without adding an extra DOM node", explain: "It lets you group a few things together WITHOUT needing an extra wrapping box around them. Like holding three toys with just your two hands — no need for a basket you don't actually want.", category: "React" },
+  { id: 642, question: "What shorthand syntax represents a Fragment?", answer: "<></>", explain: "Empty angle brackets! It's like an invisible see-through box: it holds your toys together but you can't even see it's there.", category: "React" },
+  { id: 643, question: "What is 'lifting state up'?", answer: "Moving shared state to the closest common ancestor component", explain: "It means moving a shared toy (state) up to the closest grown-up (parent component) who can hand it down to BOTH kids that need to play with it together.", category: "React" },
+  { id: 644, question: "What does 'React.memo' do?", answer: "Memoizes a component to skip re-rendering when props are unchanged", explain: "It's like telling a component 'hey, if nothing about your toys changed, don't bother redrawing your picture again — just chill and reuse the old one.' Saves time and energy!", category: "React" },
+  { id: 645, question: "What is a 'side effect' in React?", answer: "An operation that affects something outside the component (e.g. fetching, subscriptions)", explain: "It's anything that reaches OUTSIDE your component's own little world — like calling someone on the phone, grabbing data from the internet, or setting a timer. It's a 'side quest' outside the main drawing job.", category: "React" },
+  { id: 646, question: "What framework built on React adds server-side rendering and routing?", answer: "Next.js", explain: "Imagine React is your box of Lego bricks, and Next.js is the fancy instruction booklet PLUS extra special pieces that help you build a whole Lego city faster.", category: "React" },
+  { id: 647, question: "What does SSR stand for?", answer: "Server-Side Rendering", explain: "It means the picture gets drawn on a big far-away computer (the server) FIRST, then mailed to you already finished — so you see it super quick instead of waiting for your own device to draw it from scratch.", category: "React" },
+  { id: 648, question: "What React concept describes a component re-rendering due to state or prop changes?", answer: "Re-rendering", explain: "It's like erasing your drawing a tiny bit and redrawing just the part that changed, every time your toy (state) or gift box (props) gets updated.", category: "React" },
 ];
 
 const CATEGORY_COLORS = {
-  Science:   { bg: '#0d2137', accent: '#38bdf8', pill: '#0c3251' },
-  Geography: { bg: '#0d2a1a', accent: '#4ade80', pill: '#0a3320' },
-  History:   { bg: '#2d1b0e', accent: '#fb923c', pill: '#4a2800' },
-  Tech:      { bg: '#0f1f2d', accent: '#818cf8', pill: '#1e2a4a' },
-  Custom:    { bg: '#1e1a14', accent: '#fbbf24', pill: '#362d10' },
+  JavaScript: { bg: '#2d2a0e', accent: '#facc15', pill: '#4a4400' },
+  Python:     { bg: '#0d2a1a', accent: '#4ade80', pill: '#0a3320' },
+  Java:       { bg: '#2d1b0e', accent: '#fb923c', pill: '#4a2800' },
+  'C++':      { bg: '#1e1533', accent: '#a78bfa', pill: '#2f2050' },
+  Go:         { bg: '#0d2137', accent: '#38bdf8', pill: '#0c3251' },
+  React:      { bg: '#0e2530', accent: '#61dafb', pill: '#0a3c4a' },
+  Custom:     { bg: '#1e1a14', accent: '#fbbf24', pill: '#362d10' },
 };
-const CATEGORY_EMOJI = { Science:'🔬', Geography:'🌍', History:'🏛️', Tech:'💻', Custom:'✨' };
+const CATEGORY_EMOJI = { JavaScript:'🟨', Python:'🐍', Java:'☕', 'C++':'➕', Go:'🐹', React:'⚛️', Custom:'✨' };
 const getCat = (cat) => CATEGORY_COLORS[cat] || CATEGORY_COLORS.Custom;
 
 // ── views ──────────────────────────────────────────────────────────────────
@@ -85,10 +144,14 @@ export default function App() {
 
   const [cards, setCards] = useState(() => {
     try {
-      const s = localStorage.getItem('fc_v3');
-      const parsed = s ? JSON.parse(s) : starterCards;
-      // migration: strip any legacy 'Cats' category cards from persisted data
-      return parsed.filter(c => c.category !== 'Cats');
+      const s = localStorage.getItem('fc_v5');
+      if (!s) return starterCards;
+      const saved = JSON.parse(s);
+      // always use the current starter card content (so app updates to built-in
+      // cards show up), and keep any truly user-added custom cards on top
+      const starterIds = new Set(starterCards.map(c => c.id));
+      const userAdded = saved.filter(c => !starterIds.has(c.id));
+      return [...starterCards, ...userAdded];
     }
     catch { return starterCards; }
   });
@@ -98,7 +161,7 @@ export default function App() {
 
   // permanent mastery — persists across sessions, drives level unlocking
   const [masteredIds, setMasteredIds] = useState(() => {
-    try { const s = localStorage.getItem('fc_mastered'); return s ? JSON.parse(s) : []; }
+    try { const s = localStorage.getItem('fc_mastered_v2'); return s ? JSON.parse(s) : []; }
     catch { return []; }
   });
 
@@ -111,6 +174,7 @@ export default function App() {
   const [activeCategory, setActiveCategory] = useState(ALL_CATEGORY);
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
+  const [answerTab, setAnswerTab] = useState('answer');
   const [cameFromMap, setCameFromMap] = useState(false);
 
   // add card form
@@ -172,10 +236,10 @@ export default function App() {
   const colors = currentCard ? getCat(currentCard.category) : getCat('Custom');
 
   // persist cards
-  useEffect(() => { localStorage.setItem('fc_v3', JSON.stringify(cards)); }, [cards]);
+  useEffect(() => { localStorage.setItem('fc_v5', JSON.stringify(cards)); }, [cards]);
 
   // persist mastered ids
-  useEffect(() => { localStorage.setItem('fc_mastered', JSON.stringify(masteredIds)); }, [masteredIds]);
+  useEffect(() => { localStorage.setItem('fc_mastered_v2', JSON.stringify(masteredIds)); }, [masteredIds]);
 
   // streak logic
   useEffect(() => {
@@ -192,6 +256,9 @@ export default function App() {
 
   // reset index on category change
   useEffect(() => { setIndex(0); setFlipped(false); }, [activeCategory]);
+
+  // reset to the Answer tab whenever the card changes
+  useEffect(() => { setAnswerTab('answer'); }, [index, activeCategory]);
 
   const flipCard = useCallback(() => setFlipped(f => !f), []);
   const nextCard = useCallback(() => {
@@ -423,7 +490,7 @@ export default function App() {
           </p>
 
           {/* Card */}
-          <div onClick={flipCard} style={{ perspective:'1000px', height: isXLarge ? '420px' : isLarge ? '360px' : isDesktop ? '300px' : '220px', cursor:'pointer', marginBottom:'14px' }}>
+          <div onClick={flipCard} style={{ perspective:'1000px', height: (currentCard?.explain ? (isXLarge ? 460 : isLarge ? 400 : isDesktop ? 340 : 300) : (isXLarge ? 420 : isLarge ? 360 : isDesktop ? 300 : 220)) + 'px', cursor:'pointer', marginBottom:'14px' }}>
             <div style={{
               width:'100%', height:'100%', position:'relative', transformStyle:'preserve-3d',
               transition:'transform 0.5s cubic-bezier(0.23,1,0.32,1)',
@@ -447,13 +514,37 @@ export default function App() {
                 position:'absolute', width:'100%', height:'100%', backfaceVisibility:'hidden',
                 borderRadius:'16px', background:`linear-gradient(145deg,${colors.bg},#0a0a0f)`,
                 border:`1.5px solid ${colors.accent}55`, display:'flex', flexDirection:'column',
-                alignItems:'center', justifyContent:'center', padding: isXLarge ? '48px' : isDesktop ? '36px' : '24px', boxSizing:'border-box',
+                alignItems:'center', justifyContent: currentCard?.explain ? 'flex-start' : 'center', padding: isXLarge ? '48px' : isDesktop ? '36px' : '24px', boxSizing:'border-box',
                 transform:'rotateY(180deg)', boxShadow:`0 0 50px ${colors.accent}25`,
               }}>
-                <span style={{ fontSize:'11px', fontWeight:'600', letterSpacing:'1.5px', color:colors.accent, opacity:0.7, marginBottom:'14px', textTransform:'uppercase' }}>Answer</span>
-                <p style={{ fontSize: isXLarge ? '30px' : isDesktop ? '24px' : '21px', fontWeight:'600', textAlign:'center', margin:0, lineHeight:1.4, color:colors.accent }}>
-                  {currentCard?.answer}
-                </p>
+                {currentCard?.explain && (
+                  <div onClick={e => e.stopPropagation()} style={{ display:'flex', gap:'6px', marginBottom:'16px', background:'#00000033', borderRadius:'999px', padding:'4px' }}>
+                    <button onClick={() => setAnswerTab('answer')} style={{
+                      padding:'6px 16px', borderRadius:'999px', border:'none', cursor:'pointer', fontSize:'12px', fontWeight:'700',
+                      background: answerTab === 'answer' ? colors.accent : 'transparent',
+                      color: answerTab === 'answer' ? '#0a0a0f' : colors.accent,
+                    }}>Answer</button>
+                    <button onClick={() => setAnswerTab('explain')} style={{
+                      padding:'6px 16px', borderRadius:'999px', border:'none', cursor:'pointer', fontSize:'12px', fontWeight:'700',
+                      background: answerTab === 'explain' ? colors.accent : 'transparent',
+                      color: answerTab === 'explain' ? '#0a0a0f' : colors.accent,
+                    }}>Explain like I'm 5</button>
+                  </div>
+                )}
+                {!currentCard?.explain && (
+                  <span style={{ fontSize:'11px', fontWeight:'600', letterSpacing:'1.5px', color:colors.accent, opacity:0.7, marginBottom:'14px', textTransform:'uppercase' }}>Answer</span>
+                )}
+                <div style={{ flex:1, minHeight:0, overflowY:'auto', display:'flex', alignItems:'center', width:'100%' }}>
+                  {answerTab === 'answer' || !currentCard?.explain ? (
+                    <p style={{ fontSize: isXLarge ? '30px' : isDesktop ? '24px' : '21px', fontWeight:'600', textAlign:'center', margin:0, lineHeight:1.4, color:colors.accent, width:'100%' }}>
+                      {currentCard?.answer}
+                    </p>
+                  ) : (
+                    <p style={{ fontSize: isXLarge ? '19px' : isDesktop ? '17px' : '15px', fontWeight:'500', textAlign:'center', margin:0, lineHeight:1.6, color:'#f1f5f9', width:'100%' }}>
+                      {currentCard?.explain}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
