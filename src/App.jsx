@@ -1,435 +1,363 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useRef } from "react";
 
-const ALL_CATEGORY = 'All';
-const LEVEL_ORDER = ['Cats', 'Science', 'Geography', 'History', 'Tech'];
-
-const starterCards = [
-  { id: 1, question: "How long do cats sleep per day?", answer: "12–16 hours on average", category: "Cats" },
-  { id: 2, question: "What is a group of cats called?", answer: "A clowder", category: "Cats" },
-  { id: 3, question: "How many toes does a normal cat have?", answer: "18 toes total", category: "Cats" },
-  { id: 4, question: "What does a slow blink mean?", answer: "Trust and affection", category: "Cats" },
-  { id: 5, question: "Can cats see in complete darkness?", answer: "No — but need 6x less light than humans", category: "Cats" },
-  { id: 6, question: "What is a polydactyl cat?", answer: "A cat born with extra toes", category: "Cats" },
-  { id: 7, question: "Why do cats knead?", answer: "Comfort behavior from kittenhood", category: "Cats" },
-  { id: 8, question: "How fast can a cat run?", answer: "Up to 30 mph", category: "Cats" },
-  { id: 9, question: "Tail straight up means...?", answer: "Happy and confident", category: "Cats" },
-  { id: 10, question: "Do cats have a dominant paw?", answer: "Yes — left or right pawed", category: "Cats" },
-  { id: 11, question: "What is the powerhouse of the cell?", answer: "The mitochondria", category: "Science" },
-  { id: 12, question: "How many bones are in the human body?", answer: "206 bones (adults)", category: "Science" },
-  { id: 13, question: "What planet is closest in size to Earth?", answer: "Venus", category: "Science" },
-  { id: 14, question: "What gas do plants absorb from the air?", answer: "Carbon dioxide (CO₂)", category: "Science" },
-  { id: 15, question: "How many elements are on the periodic table?", answer: "118 elements", category: "Science" },
-  { id: 16, question: "What is the speed of light?", answer: "~299,792 km per second", category: "Science" },
-  { id: 17, question: "What is DNA short for?", answer: "Deoxyribonucleic acid", category: "Science" },
-  { id: 18, question: "What layer of Earth do we live on?", answer: "The crust", category: "Science" },
-  { id: 19, question: "What is the longest river in the world?", answer: "The Nile (6,650 km)", category: "Geography" },
-  { id: 20, question: "What is the smallest country in the world?", answer: "Vatican City", category: "Geography" },
-  { id: 21, question: "Which continent has the most countries?", answer: "Africa (54 countries)", category: "Geography" },
-  { id: 22, question: "What ocean is the largest?", answer: "The Pacific Ocean", category: "Geography" },
-  { id: 23, question: "What is the capital of Australia?", answer: "Canberra", category: "Geography" },
-  { id: 24, question: "Which country has the most natural lakes?", answer: "Canada", category: "Geography" },
-  { id: 25, question: "In what year did World War II end?", answer: "1945", category: "History" },
-  { id: 26, question: "Who was the first US president?", answer: "George Washington", category: "History" },
-  { id: 27, question: "What ancient wonder was in Alexandria?", answer: "The Great Library / Lighthouse", category: "History" },
-  { id: 28, question: "What year did the Berlin Wall fall?", answer: "1989", category: "History" },
-  { id: 29, question: "Who invented the telephone?", answer: "Alexander Graham Bell (1876)", category: "History" },
-  { id: 30, question: "What empire was ruled by Julius Caesar?", answer: "The Roman Empire", category: "History" },
-  { id: 31, question: "What does CPU stand for?", answer: "Central Processing Unit", category: "Tech" },
-  { id: 32, question: "What language is React written in?", answer: "JavaScript", category: "Tech" },
-  { id: 33, question: "What does HTTP stand for?", answer: "HyperText Transfer Protocol", category: "Tech" },
-  { id: 34, question: "What is an API?", answer: "A way for apps to communicate with each other", category: "Tech" },
-  { id: 35, question: "What does CSS stand for?", answer: "Cascading Style Sheets", category: "Tech" },
-  { id: 36, question: "What is a 'bug' in coding?", answer: "An error or flaw in the code", category: "Tech" },
+const INITIAL_POSTS = [
+  {
+    id: 1,
+    user: "dominic.art",
+    avatar: "D",
+    avatarColor: "#a78bfa",
+    time: "2 min ago",
+    image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=600&q=80",
+    caption: "Spent the morning doing gesture drawings. Starting to feel the difference in my lines 🎨",
+    likes: 142,
+    comments: [
+      { user: "sketchy.vibes", text: "Your lines are so clean now!" },
+      { user: "artdaily_", text: "Love the progress 🔥" },
+    ],
+    liked: false,
+    saved: false,
+  },
+  {
+    id: 2,
+    user: "urban.lens",
+    avatar: "U",
+    avatarColor: "#34d399",
+    time: "1 hr ago",
+    image: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=600&q=80",
+    caption: "City never sleeps. Neither do I apparently 🌆",
+    likes: 388,
+    comments: [
+      { user: "nightowl.photos", text: "What camera did you use?" },
+    ],
+    liked: false,
+    saved: false,
+  },
 ];
 
-const CATEGORY_COLORS = {
-  Cats:      { bg: '#2a1f3d', accent: '#c084fc', pill: '#3d1f5c' },
-  Science:   { bg: '#0d2137', accent: '#38bdf8', pill: '#0c3251' },
-  Geography: { bg: '#0d2a1a', accent: '#4ade80', pill: '#0a3320' },
-  History:   { bg: '#2d1b0e', accent: '#fb923c', pill: '#4a2800' },
-  Tech:      { bg: '#0f1f2d', accent: '#818cf8', pill: '#1e2a4a' },
-  Custom:    { bg: '#1e1a14', accent: '#fbbf24', pill: '#362d10' },
-};
-const CATEGORY_EMOJI = { Cats:'🐱', Science:'🔬', Geography:'🌍', History:'🏛️', Tech:'💻', Custom:'✨' };
-const getCat = (cat) => CATEGORY_COLORS[cat] || CATEGORY_COLORS.Custom;
+const STORIES = [
+  { id: 1, user: "Your story", avatar: "+", avatarColor: "#2a2a3a", isAdd: true },
+  { id: 2, user: "kai.draws", avatar: "K", avatarColor: "#f472b6" },
+  { id: 3, user: "luz.foto", avatar: "L", avatarColor: "#38bdf8" },
+  { id: 4, user: "reo_art", avatar: "R", avatarColor: "#facc15" },
+  { id: 5, user: "nova.ui", avatar: "N", avatarColor: "#34d399" },
+];
 
-// ── views ──────────────────────────────────────────────────────────────────
-const VIEWS = { MAP: 'map', STUDY: 'study', STATS: 'stats', MANAGE: 'manage' };
+function Avatar({ letter, color, size = 36 }) {
+  return (
+    <div style={{
+      width: size, height: size, borderRadius: "50%",
+      background: color, display: "flex", alignItems: "center",
+      justifyContent: "center", fontWeight: 700,
+      fontSize: size * 0.38, color: "#fff", flexShrink: 0,
+    }}>
+      {letter}
+    </div>
+  );
+}
 
-export default function App() {
-  const [cards, setCards] = useState(() => {
-    try { const s = localStorage.getItem('fc_v3'); return s ? JSON.parse(s) : starterCards; }
-    catch { return starterCards; }
-  });
+function StoryRing({ children, active }) {
+  return (
+    <div style={{
+      padding: 2, borderRadius: "50%",
+      background: active ? "linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)" : "#2a2a3a",
+    }}>
+      <div style={{ padding: 2, background: "#0f0f1a", borderRadius: "50%" }}>
+        {children}
+      </div>
+    </div>
+  );
+}
 
-  // session results: { [cardId]: 'know' | 'dontknow' }
-  const [results, setResults] = useState({});
+function NewPostModal({ onClose, onPost }) {
+  const [image, setImage] = useState(null);
+  const [caption, setCaption] = useState("");
+  const [step, setStep] = useState("upload");
+  const fileRef = useRef();
 
-  // permanent mastery — persists across sessions, drives level unlocking
-  const [masteredIds, setMasteredIds] = useState(() => {
-    try { const s = localStorage.getItem('fc_mastered'); return s ? JSON.parse(s) : []; }
-    catch { return []; }
-  });
-
-  const [streak, setStreak] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('fc_streak') || '{"count":0,"lastDate":""}'); }
-    catch { return { count: 0, lastDate: '' }; }
-  });
-
-  const [view, setView] = useState(VIEWS.MAP);
-  const [activeCategory, setActiveCategory] = useState(ALL_CATEGORY);
-  const [index, setIndex] = useState(0);
-  const [flipped, setFlipped] = useState(false);
-  const [cameFromMap, setCameFromMap] = useState(false);
-
-  // add card form
-  const [showForm, setShowForm] = useState(false);
-  const [newQ, setNewQ] = useState('');
-  const [newA, setNewA] = useState('');
-  const [newCat, setNewCat] = useState('Custom');
-  const [justAdded, setJustAdded] = useState(false);
-
-  // edit modal
-  const [editCard, setEditCard] = useState(null);
-  const [editQ, setEditQ] = useState('');
-  const [editA, setEditA] = useState('');
-  const [editCat, setEditCat] = useState('Custom');
-
-  // import/export
-  const [importMsg, setImportMsg] = useState('');
-
-  const exportCards = () => {
-    const data = JSON.stringify({ version: 1, exported: new Date().toISOString(), cards }, null, 2);
-    const blob = new Blob([data], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `flashcards-${new Date().toISOString().slice(0,10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const importCards = (e) => {
+  const handleFile = (e) => {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => {
-      try {
-        const parsed = JSON.parse(ev.target.result);
-        const incoming = parsed.cards || parsed;
-        if (!Array.isArray(incoming)) throw new Error('Invalid format');
-        const existingQs = new Set(cards.map(c => c.question.toLowerCase()));
-        const newCards = incoming
-          .filter(c => c.question && c.answer)
-          .map(c => ({ ...c, id: c.id || Date.now() + Math.random() }))
-          .filter(c => !existingQs.has(c.question.toLowerCase()));
-        setCards(prev => [...prev, ...newCards]);
-        setImportMsg(`✅ Imported ${newCards.length} new card${newCards.length !== 1 ? 's' : ''}!`);
-        setTimeout(() => setImportMsg(''), 3000);
-      } catch {
-        setImportMsg('❌ Invalid file — make sure it\'s a flashcards JSON');
-        setTimeout(() => setImportMsg(''), 3000);
-      }
-    };
-    reader.readAsText(file);
-    e.target.value = '';
+    reader.onload = (ev) => { setImage(ev.target.result); setStep("preview"); };
+    reader.readAsDataURL(file);
   };
 
-  const categories = [ALL_CATEGORY, ...Array.from(new Set(cards.map(c => c.category)))];
-  const filtered = activeCategory === ALL_CATEGORY ? cards : cards.filter(c => c.category === activeCategory);
-  const currentCard = filtered[index] || filtered[0];
-  const colors = currentCard ? getCat(currentCard.category) : getCat('Custom');
-
-  // persist cards
-  useEffect(() => { localStorage.setItem('fc_v3', JSON.stringify(cards)); }, [cards]);
-
-  // persist mastered ids
-  useEffect(() => { localStorage.setItem('fc_mastered', JSON.stringify(masteredIds)); }, [masteredIds]);
-
-  // streak logic
-  useEffect(() => {
-    const today = new Date().toDateString();
-    if (streak.lastDate === today) return;
-    const yesterday = new Date(Date.now() - 86400000).toDateString();
-    const newStreak = {
-      count: streak.lastDate === yesterday ? streak.count + 1 : 1,
-      lastDate: today,
-    };
-    setStreak(newStreak);
-    localStorage.setItem('fc_streak', JSON.stringify(newStreak));
-  }, []);
-
-  // reset index on category change
-  useEffect(() => { setIndex(0); setFlipped(false); }, [activeCategory]);
-
-  const flipCard = useCallback(() => setFlipped(f => !f), []);
-  const nextCard = useCallback(() => {
-    setFlipped(false);
-    setTimeout(() => setIndex(i => (i + 1) % filtered.length), 50);
-  }, [filtered.length]);
-  const prevCard = useCallback(() => {
-    setFlipped(false);
-    setTimeout(() => setIndex(i => (i - 1 + filtered.length) % filtered.length), 50);
-  }, [filtered.length]);
-
-  useEffect(() => {
-    if (view !== VIEWS.STUDY) return;
-    const fn = (e) => {
-      if (['INPUT','TEXTAREA'].includes(e.target.tagName)) return;
-      if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipCard(); }
-      else if (e.key === 'ArrowRight') nextCard();
-      else if (e.key === 'ArrowLeft') prevCard();
-    };
-    window.addEventListener('keydown', fn);
-    return () => window.removeEventListener('keydown', fn);
-  }, [view, flipCard, nextCard, prevCard]);
-
-  // know / don't know
-  const markCard = (cardId, result) => {
-    setResults(prev => ({ ...prev, [cardId]: result }));
-    if (result === 'know') {
-      setMasteredIds(prev => prev.includes(cardId) ? prev : [...prev, cardId]);
-    }
-    nextCard();
+  const handlePost = () => {
+    if (!image) return;
+    onPost({ image, caption });
+    onClose();
   };
-
-  const resetSession = () => { setResults({}); setIndex(0); setFlipped(false); };
-
-  // session stats
-  const sessionCards = filtered.filter(c => results[c.id]);
-  const known = sessionCards.filter(c => results[c.id] === 'know').length;
-  const dontKnow = sessionCards.filter(c => results[c.id] === 'dontknow').length;
-  const total = filtered.length;
-  const pct = total > 0 ? Math.round((known / total) * 100) : 0;
-
-  const addCard = () => {
-    if (!newQ.trim() || !newA.trim()) return;
-    const card = { id: Date.now(), question: newQ.trim(), answer: newA.trim(), category: newCat };
-    setCards(prev => [...prev, card]);
-    setNewQ(''); setNewA('');
-    setJustAdded(true);
-    setActiveCategory(newCat);
-    setTimeout(() => setJustAdded(false), 2000);
-  };
-
-  const deleteCard = (id) => {
-    setCards(prev => prev.filter(c => c.id !== id));
-    setResults(prev => { const n = {...prev}; delete n[id]; return n; });
-  };
-
-  const openEdit = (card) => {
-    setEditCard(card);
-    setEditQ(card.question);
-    setEditA(card.answer);
-    setEditCat(card.category);
-  };
-  const saveEdit = () => {
-    if (!editQ.trim() || !editA.trim()) return;
-    setCards(prev => prev.map(c => c.id === editCard.id
-      ? { ...c, question: editQ.trim(), answer: editA.trim(), category: editCat }
-      : c
-    ));
-    setEditCard(null);
-  };
-
-  const getMastery = (cat) => {
-    const catCards = cat === ALL_CATEGORY ? cards : cards.filter(c => c.category === cat);
-    if (!catCards.length) return 0;
-    const k = catCards.filter(c => results[c.id] === 'know').length;
-    return Math.round((k / catCards.length) * 100);
-  };
-
-  // ── LEVEL / MAP LOGIC ──────────────────────────────────────────────────
-  const isLevelComplete = (cat) => {
-    const catCards = cards.filter(c => c.category === cat);
-    if (!catCards.length) return false;
-    return catCards.every(c => masteredIds.includes(c.id));
-  };
-
-  // a level is unlocked if it's the first one, or the previous one is complete
-  const isLevelUnlocked = (levelIndex) => {
-    if (levelIndex === 0) return true;
-    return isLevelComplete(LEVEL_ORDER[levelIndex - 1]);
-  };
-
-  const enterLevel = (cat) => {
-    setActiveCategory(cat);
-    setResults({});
-    setIndex(0);
-    setFlipped(false);
-    setCameFromMap(true);
-    setView(VIEWS.STUDY);
-  };
-
-  const backToMap = () => {
-    setCameFromMap(false);
-    setView(VIEWS.MAP);
-  };
-
-  const navBtn = (label, v) => (
-    <button onClick={() => setView(v)} style={{
-      padding: '8px 14px', borderRadius: '8px', border: 'none', cursor: 'pointer',
-      background: view === v ? '#1e2538' : 'transparent',
-      color: view === v ? '#e2e8f0' : '#475569',
-      fontSize: '13px', fontWeight: view === v ? '600' : '400',
-    }}>{label}</button>
-  );
 
   return (
-    <div style={{ fontFamily:"'Segoe UI',system-ui,sans-serif", minHeight:'100vh', background:'#0a0a0f', color:'#e2e8f0', padding:'20px 16px', boxSizing:'border-box' }}>
-      <div style={{ maxWidth:'520px', margin:'0 auto' }}>
-
-        {/* Header */}
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'20px' }}>
-          <div>
-            <h1 style={{ fontSize:'20px', fontWeight:'700', margin:0, letterSpacing:'-0.5px' }}>Flashcards</h1>
-            <p style={{ color:'#334155', fontSize:'12px', margin:0 }}>{cards.length} cards · 🔥 {streak.count} day streak</p>
-          </div>
-          <div style={{ display:'flex', gap:'4px', background:'#111827', borderRadius:'10px', padding:'4px' }}>
-            {navBtn('Map', VIEWS.MAP)}
-            {navBtn('Study', VIEWS.STUDY)}
-            {navBtn('Stats', VIEWS.STATS)}
-            {navBtn('Cards', VIEWS.MANAGE)}
-          </div>
+    <div style={s.modalOverlay}>
+      <div style={s.modal}>
+        <div style={s.modalHeader}>
+          <button style={s.modalClose} onClick={onClose}>✕</button>
+          <div style={s.modalTitle}>New post</div>
+          {step === "preview" ? (
+            <button style={s.shareBtn} onClick={handlePost}>Share</button>
+          ) : <div style={{ width: 40 }} />}
         </div>
 
-        {/* ── MAP VIEW ── */}
-        {view === VIEWS.MAP && (
-          <div style={{ display:'flex', flexDirection:'column', alignItems:'center', paddingTop:'10px' }}>
-            {LEVEL_ORDER.map((cat, i) => {
-              const unlocked = isLevelUnlocked(i);
-              const complete = isLevelComplete(cat);
-              const cc = getCat(cat);
-              const offset = i % 2 === 0 ? '-40px' : '40px';
-              return (
-                <div key={cat} style={{ display:'flex', flexDirection:'column', alignItems:'center' }}>
-                  <button
-                    onClick={() => unlocked && enterLevel(cat)}
-                    disabled={!unlocked}
-                    style={{
-                      marginLeft: offset,
-                      width:'84px', height:'84px', borderRadius:'50%',
-                      border: unlocked ? `2.5px solid ${cc.accent}` : '2.5px solid #1e2538',
-                      background: complete ? cc.accent : unlocked ? cc.pill : '#111827',
-                      color: complete ? '#000' : unlocked ? cc.accent : '#334155',
-                      fontSize:'28px', cursor: unlocked ? 'pointer' : 'not-allowed',
-                      boxShadow: unlocked && !complete ? `0 0 24px ${cc.accent}55` : 'none',
-                      display:'flex', alignItems:'center', justifyContent:'center',
-                      position:'relative',
-                    }}
-                  >
-                    {complete ? '✓' : unlocked ? (CATEGORY_EMOJI[cat] || '✨') : '🔒'}
-                  </button>
-                  <p style={{
-                    marginLeft: offset, marginTop:'8px', marginBottom:'0',
-                    fontSize:'13px', fontWeight:'600',
-                    color: unlocked ? cc.accent : '#334155',
-                  }}>{cat}</p>
-                  {i < LEVEL_ORDER.length - 1 && (
-                    <div style={{ width:'3px', height:'36px', background: unlocked ? '#1e2538' : '#111827', margin:'8px 0' }} />
-                  )}
-                </div>
-              );
-            })}
-            <p style={{ color:'#475569', fontSize:'12px', marginTop:'20px', textAlign:'center' }}>
-              Master every card in a level to unlock the next
-            </p>
+        {step === "upload" && (
+          <div style={s.uploadArea} onClick={() => fileRef.current.click()}>
+            <div style={{ fontSize: 48, marginBottom: 12 }}>🖼️</div>
+            <div style={{ color: "#e2e8f0", fontWeight: 600, marginBottom: 6 }}>Tap to upload your art</div>
+            <div style={{ color: "#6b7280", fontSize: 13 }}>Photos from your camera roll</div>
+            <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleFile} />
           </div>
         )}
 
-        {/* ── STUDY VIEW ── */}
-        {view === VIEWS.STUDY && (
-          <>
-            {cameFromMap && (
-              <button onClick={backToMap} style={{
-                marginBottom:'14px', padding:'8px 14px', background:'#111827', border:'1px solid #1e2538',
-                borderRadius:'10px', color:'#94a3b8', fontSize:'13px', cursor:'pointer',
-              }}>← Back to Map</button>
-            )}
-
-            {/* Category pills */}
-            <div style={{ display:'flex', gap:'8px', overflowX:'auto', paddingBottom:'12px', marginBottom:'16px', scrollbarWidth:'none' }}>
-              {categories.map(cat => {
-                const isActive = cat === activeCategory;
-                const cc = getCat(cat);
-                const m = getMastery(cat);
-                return (
-                  <button key={cat} onClick={() => { setActiveCategory(cat); setCameFromMap(false); }} style={{
-                    flexShrink:0, padding:'6px 14px', borderRadius:'999px', cursor:'pointer',
-                    border: isActive ? `1.5px solid ${cc.accent}` : '1.5px solid #1e2538',
-                    background: isActive ? cc.pill : 'transparent',
-                    color: isActive ? cc.accent : '#64748b',
-                    fontSize:'13px', fontWeight: isActive ? '600' : '400', whiteSpace:'nowrap',
-                  }}>
-                    {cat === ALL_CATEGORY ? `✦ All` : `${CATEGORY_EMOJI[cat]||'✨'} ${cat}`}
-                    {cat !== ALL_CATEGORY && m > 0 && <span style={{ marginLeft:'6px', opacity:0.6, fontSize:'11px' }}>{m}%</span>}
-                  </button>
-                );
-              })}
+        {step === "preview" && (
+          <div>
+            <img src={image} alt="" style={s.previewImg} />
+            <div style={s.captionWrap}>
+              <Avatar letter="D" color="#a78bfa" size={36} />
+              <textarea
+                style={s.captionInput}
+                placeholder="Write a caption..."
+                value={caption}
+                onChange={e => setCaption(e.target.value)}
+                rows={3}
+              />
             </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
-            {/* Session mini-bar */}
-            {sessionCards.length > 0 && (
-              <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'14px', padding:'10px 14px', background:'#111827', borderRadius:'10px' }}>
-                <span style={{ fontSize:'13px', color:'#4ade80', fontWeight:'600' }}>✓ {known}</span>
-                <span style={{ fontSize:'13px', color:'#f87171', fontWeight:'600' }}>✗ {dontKnow}</span>
-                <div style={{ flex:1, height:'4px', background:'#1e2538', borderRadius:'999px', overflow:'hidden' }}>
-                  <div style={{ width:`${pct}%`, height:'100%', background:'#4ade80', borderRadius:'999px', transition:'width 0.3s' }} />
-                </div>
-                <span style={{ fontSize:'12px', color:'#475569' }}>{sessionCards.length}/{total}</span>
-                <button onClick={resetSession} style={{ fontSize:'11px', color:'#475569', background:'none', border:'none', cursor:'pointer', padding:0 }}>Reset</button>
-              </div>
-            )}
+function Post({ post, onLike, onSave, onComment }) {
+  const [showComments, setShowComments] = useState(false);
+  const [newComment, setNewComment] = useState("");
 
-            {/* Counter */}
-            <p style={{ textAlign:'center', color:'#475569', fontSize:'13px', marginBottom:'12px' }}>
-              Card {index + 1} of {filtered.length}
-              {results[currentCard?.id] && (
-                <span style={{ marginLeft:'8px', color: results[currentCard.id]==='know' ? '#4ade80' : '#f87171' }}>
-                  {results[currentCard.id]==='know' ? '✓ Known' : '✗ Review'}
-                </span>
-              )}
-            </p>
+  return (
+    <div style={s.post}>
+      <div style={s.postHeader}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <StoryRing active>
+            <Avatar letter={post.avatar} color={post.avatarColor} size={34} />
+          </StoryRing>
+          <div>
+            <div style={s.postUser}>{post.user}</div>
+            <div style={s.postTime}>{post.time}</div>
+          </div>
+        </div>
+        <div style={s.moreBtn}>···</div>
+      </div>
 
-            {/* Card */}
-            <div onClick={flipCard} style={{ perspective:'1000px', height:'220px', cursor:'pointer', marginBottom:'14px' }}>
-              <div style={{
-                width:'100%', height:'100%', position:'relative', transformStyle:'preserve-3d',
-                transition:'transform 0.5s cubic-bezier(0.23,1,0.32,1)',
-                transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
-              }}>
-                <div style={{
-                  position:'absolute', width:'100%', height:'100%', backfaceVisibility:'hidden',
-                  borderRadius:'16px', background:`linear-gradient(145deg,${colors.bg},#0a0a0f)`,
-                  border:`1px solid ${colors.accent}22`, display:'flex', flexDirection:'column',
-                  alignItems:'center', justifyContent:'center', padding:'24px', boxSizing:'border-box',
-                  boxShadow:`0 0 40px ${colors.accent}15`,
-                }}>
-                  <span style={{ fontSize:'11px', fontWeight:'600', letterSpacing:'1.5px', color:colors.accent, opacity:0.7, marginBottom:'14px', textTransform:'uppercase' }}>
-                    {CATEGORY_EMOJI[currentCard?.category]||'✨'} {currentCard?.category}
-                  </span>
-                  <p style={{ fontSize:'19px', fontWeight:'500', textAlign:'center', margin:0, lineHeight:1.5, color:'#f1f5f9' }}>
-                    {currentCard?.question}
-                  </p>
-                </div>
-                <div style={{
-                  position:'absolute', width:'100%', height:'100%', backfaceVisibility:'hidden',
-                  borderRadius:'16px', background:`linear-gradient(145deg,${colors.bg},#0a0a0f)`,
-                  border:`1.5px solid ${colors.accent}55`, display:'flex', flexDirection:'column',
-                  alignItems:'center', justifyContent:'center', padding:'24px', boxSizing:'border-box',
-                  transform:'rotateY(180deg)', boxShadow:`0 0 50px ${colors.accent}25`,
-                }}>
-                  <span style={{ fontSize:'11px', fontWeight:'600', letterSpacing:'1.5px', color:colors.accent, opacity:0.7, marginBottom:'14px', textTransform:'uppercase' }}>Answer</span>
-                  <p style={{ fontSize:'21px', fontWeight:'600', textAlign:'center', margin:0, lineHeight:1.4, color:colors.accent }}>
-                    {currentCard?.answer}
-                  </p>
-                </div>
-              </div>
+      <img src={post.image} alt="" style={s.postImg} />
+
+      <div style={s.actions}>
+        <div style={{ display: "flex", gap: 14 }}>
+          <button onClick={() => onLike(post.id)} style={s.actionBtn}>
+            <span style={{ fontSize: 22, transition: "transform 0.15s", transform: post.liked ? "scale(1.2)" : "scale(1)", display: "block" }}>
+              {post.liked ? "❤️" : "🤍"}
+            </span>
+          </button>
+          <button onClick={() => setShowComments(!showComments)} style={s.actionBtn}>
+            <span style={{ fontSize: 20 }}>💬</span>
+          </button>
+          <button style={s.actionBtn}><span style={{ fontSize: 20 }}>📤</span></button>
+        </div>
+        <button onClick={() => onSave(post.id)} style={s.actionBtn}>
+          <span style={{ fontSize: 20 }}>{post.saved ? "🔖" : "🏷️"}</span>
+        </button>
+      </div>
+
+      <div style={s.likes}>{post.likes.toLocaleString()} likes</div>
+      <div style={s.caption}>
+        <span style={s.captionUser}>{post.user} </span>{post.caption}
+      </div>
+
+      {post.comments.length > 0 && (
+        <div style={s.viewComments} onClick={() => setShowComments(!showComments)}>
+          {showComments ? "Hide comments" : `View all ${post.comments.length} comments`}
+        </div>
+      )}
+
+      {showComments && (
+        <div style={{ paddingLeft: 14, paddingRight: 14 }}>
+          {post.comments.map((c, i) => (
+            <div key={i} style={s.comment}>
+              <span style={s.captionUser}>{c.user} </span>
+              <span style={{ color: "#e2e8f0", fontSize: 13 }}>{c.text}</span>
             </div>
+          ))}
+        </div>
+      )}
 
-            <p style={{ textAlign:'center', color:'#1e2538', fontSize:'12px', marginBottom:'16px' }}>Tap to flip · Arrow keys to navigate</p>
+      <div style={s.commentRow}>
+        <Avatar letter="D" color="#a78bfa" size={26} />
+        <input
+          style={s.commentInput}
+          placeholder="Add a comment..."
+          value={newComment}
+          onChange={e => setNewComment(e.target.value)}
+          onKeyDown={e => {
+            if (e.key === "Enter" && newComment.trim()) {
+              onComment(post.id, newComment.trim());
+              setNewComment("");
+            }
+          }}
+        />
+        {newComment && (
+          <button style={s.postCommentBtn} onClick={() => { onComment(post.id, newComment.trim()); setNewComment(""); }}>
+            Post
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
 
-            {flipped && (
-              <div style={{ display:'flex', gap:'10px', marginBottom:'16px' }}>
-                <button onClick={() => markCard(currentCard.id, 'dontknow')} style={{
-                  flex:1, pad
+export default function App() {
+  const [posts, setPosts] = useState(INITIAL_POSTS);
+  const [tab, setTab] = useState("home");
+  const [showNewPost, setShowNewPost] = useState(false);
+
+  const handleLike = (id) => {
+    setPosts(prev => prev.map(p =>
+      p.id === id ? { ...p, liked: !p.liked, likes: p.liked ? p.likes - 1 : p.likes + 1 } : p
+    ));
+  };
+
+  const handleSave = (id) => {
+    setPosts(prev => prev.map(p => p.id === id ? { ...p, saved: !p.saved } : p));
+  };
+
+  const handleComment = (id, text) => {
+    setPosts(prev => prev.map(p =>
+      p.id === id ? { ...p, comments: [...p.comments, { user: "dominic.art", text }] } : p
+    ));
+  };
+
+  const handleNewPost = ({ image, caption }) => {
+    const newPost = {
+      id: Date.now(),
+      user: "dominic.art",
+      avatar: "D",
+      avatarColor: "#a78bfa",
+      time: "Just now",
+      image,
+      caption: caption || "New post 🎨",
+      likes: 0,
+      comments: [],
+      liked: false,
+      saved: false,
+    };
+    setPosts(prev => [newPost, ...prev]);
+    setTab("home");
+  };
+
+  return (
+    <div style={s.root}>
+      <div style={s.app}>
+        <header style={s.topNav}>
+          <div style={s.navLogo}>GRAMO</div>
+          <div style={{ display: "flex", gap: 16 }}>
+            <span style={s.navIcon}>🔔</span>
+            <span style={s.navIcon}>✉️</span>
+          </div>
+        </header>
+
+        <div style={s.storiesWrap}>
+          <div style={s.stories}>
+            {STORIES.map(story => (
+              <div key={story.id} style={s.story} onClick={() => story.isAdd && setShowNewPost(true)}>
+                {story.isAdd ? (
+                  <div style={s.addStory}>
+                    <Avatar letter={story.avatar} color={story.avatarColor} size={56} />
+                  </div>
+                ) : (
+                  <StoryRing active>
+                    <Avatar letter={story.avatar} color={story.avatarColor} size={56} />
+                  </StoryRing>
+                )}
+                <div style={s.storyName}>{story.user}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={s.divider} />
+
+        <div style={s.feed}>
+          {posts.map(post => (
+            <Post key={post.id} post={post} onLike={handleLike} onSave={handleSave} onComment={handleComment} />
+          ))}
+        </div>
+
+        <nav style={s.bottomNav}>
+          {[
+            { id: "home", icon: "🏠" },
+            { id: "search", icon: "🔍" },
+            { id: "add", icon: "➕", action: () => setShowNewPost(true) },
+            { id: "reels", icon: "🎬" },
+            { id: "profile", icon: "👤" },
+          ].map(item => (
+            <button
+              key={item.id}
+              onClick={() => { setTab(item.id); item.action && item.action(); }}
+              style={{
+                ...s.navBtn,
+                opacity: tab === item.id ? 1 : 0.45,
+                transform: tab === item.id ? "scale(1.2)" : "scale(1)",
+              }}
+            >
+              {item.icon}
+            </button>
+          ))}
+        </nav>
+
+        {showNewPost && (
+          <NewPostModal onClose={() => setShowNewPost(false)} onPost={handleNewPost} />
+        )}
+      </div>
+    </div>
+  );
+}
+
+const s = {
+  root: { background: "#000", minHeight: "100vh", display: "flex", justifyContent: "center", fontFamily: "'Inter', system-ui, sans-serif" },
+  app: { width: "100%", maxWidth: 480, background: "#0f0f1a", minHeight: "100vh", display: "flex", flexDirection: "column", position: "relative", paddingBottom: 60 },
+  topNav: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 16px", borderBottom: "1px solid #1e1e30", position: "sticky", top: 0, background: "#0f0f1a", zIndex: 10 },
+  navLogo: { fontSize: 22, fontWeight: 800, color: "#e2e8f0", letterSpacing: "-0.03em" },
+  navIcon: { fontSize: 22, cursor: "pointer" },
+  storiesWrap: { overflowX: "auto", padding: "12px 0" },
+  stories: { display: "flex", gap: 14, paddingLeft: 16, paddingRight: 16, width: "max-content" },
+  story: { display: "flex", flexDirection: "column", alignItems: "center", gap: 5, cursor: "pointer" },
+  addStory: { border: "2px dashed #2a2a3a", borderRadius: "50%", padding: 2 },
+  storyName: { fontSize: 11, color: "#9ca3af", maxWidth: 60, textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+  divider: { height: 1, background: "#1e1e30" },
+  feed: { flex: 1 },
+  post: { borderBottom: "1px solid #1e1e30", paddingBottom: 8, marginBottom: 8 },
+  postHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px" },
+  postUser: { fontSize: 13, fontWeight: 700, color: "#e2e8f0" },
+  postTime: { fontSize: 11, color: "#6b7280" },
+  moreBtn: { color: "#6b7280", fontSize: 18, cursor: "pointer", letterSpacing: 1 },
+  postImg: { width: "100%", aspectRatio: "1/1", objectFit: "cover", display: "block" },
+  actions: { display: "flex", justifyContent: "space-between", padding: "10px 14px 4px" },
+  actionBtn: { background: "none", border: "none", cursor: "pointer", padding: 2 },
+  likes: { paddingLeft: 14, fontSize: 13, fontWeight: 700, color: "#e2e8f0", marginBottom: 4 },
+  caption: { paddingLeft: 14, paddingRight: 14, fontSize: 13, color: "#d1d5db", marginBottom: 4, lineHeight: 1.5 },
+  captionUser: { fontWeight: 700, color: "#e2e8f0" },
+  viewComments: { paddingLeft: 14, fontSize: 13, color: "#6b7280", cursor: "pointer", marginBottom: 4 },
+  comment: { fontSize: 13, marginBottom: 4, lineHeight: 1.5 },
+  commentRow: { display: "flex", alignItems: "center", gap: 10, padding: "8px 14px", borderTop: "1px solid #1a1a2a" },
+  commentInput: { flex: 1, background: "transparent", border: "none", outline: "none", color: "#9ca3af", fontSize: 13 },
+  postCommentBtn: { background: "none", border: "none", color: "#a78bfa", fontWeight: 700, fontSize: 13, cursor: "pointer" },
+  bottomNav: { position: "fixed", bottom: 0, width: "100%", maxWidth: 480, background: "#0f0f1a", borderTop: "1px solid #1e1e30", display: "flex", justifyContent: "space-around", padding: "10px 0", zIndex: 10 },
+  navBtn: { background: "none", border: "none", fontSize: 22, cursor: "pointer", transition: "all 0.15s ease" },
+  modalOverlay: { position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", zIndex: 100, display: "flex", alignItems: "flex-end", justifyContent: "center" },
+  modal: { background: "#13131f", borderRadius: "20px 20px 0 0", width: "100%", maxWidth: 480, maxHeight: "90vh", overflow: "auto" },
+  modalHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 16px 12px", borderBottom: "1px solid #1e1e30" },
+  modalTitle: { fontSize: 15, fontWeight: 700, color: "#e2e8f0" },
+  modalClose: { background: "none", border: "none", color: "#6b7280", fontSize: 18, cursor: "pointer", width: 40 },
+  shareBtn: { background: "#a78bfa", color: "#fff", border: "none", borderRadius: 8, padding: "6px 14px", fontWeight: 700, fontSize: 13, cursor: "pointer" },
+  uploadArea: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "60px 20px", cursor: "pointer" },
+  previewImg: { width: "100%", aspectRatio: "1/1", objectFit: "cover", display: "block" },
+  captionWrap: { display: "flex", gap: 12, padding: "16px", alignItems: "flex-start" },
+  captionInput: { flex: 1, background: "transparent", border: "none", outline: "none", color: "#e2e8f0", fontSize: 14, resize: "none", fontFamily: "inherit" },
+};
