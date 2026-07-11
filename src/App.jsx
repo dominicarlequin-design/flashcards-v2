@@ -330,13 +330,13 @@ export default function App() {
     <>
       {/* ── MAP VIEW ── */}
       {view === VIEWS.MAP && (
-        <div style={{ display:'flex', flexDirection:'column', alignItems:'center', paddingTop: isDesktop ? '24px' : '10px' }}>
+        <div style={{ display:'flex', flexDirection:'column', alignItems:'center', paddingTop: isXLarge ? '48px' : isDesktop ? '24px' : '10px' }}>
           {LEVEL_ORDER.map((cat, i) => {
             const unlocked = isLevelUnlocked(i);
             const complete = isLevelComplete(cat);
             const cc = getCat(cat);
-            const size = isDesktop ? '100px' : '84px';
-            const offsetAmt = isDesktop ? 56 : 40;
+            const size = isXLarge ? '150px' : isLarge ? '120px' : isDesktop ? '100px' : '84px';
+            const offsetAmt = isXLarge ? 260 : isLarge ? 160 : isDesktop ? 56 : 40;
             const offset = i % 2 === 0 ? `-${offsetAmt}px` : `${offsetAmt}px`;
             return (
               <div key={cat} style={{ display:'flex', flexDirection:'column', alignItems:'center' }}>
