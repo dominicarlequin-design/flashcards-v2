@@ -78,9 +78,21 @@ function useIsLarge() {
   return isLarge;
 }
 
+// very wide desktop (MacBook Pro 16" and bigger external displays)
+function useIsXLarge() {
+  const [isXLarge, setIsXLarge] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 1700);
+  useEffect(() => {
+    const fn = () => setIsXLarge(window.innerWidth >= 1700);
+    window.addEventListener('resize', fn);
+    return () => window.removeEventListener('resize', fn);
+  }, []);
+  return isXLarge;
+}
+
 export default function App() {
   const isDesktop = useIsDesktop();
   const isLarge = useIsLarge();
+  const isXLarge = useIsXLarge();
 
   const [cards, setCards] = useState(() => {
     try { const s = localStorage.getItem('fc_v3'); return s ? JSON.parse(s) : starterCards; }
@@ -364,7 +376,7 @@ export default function App() {
 
       {/* ── STUDY VIEW ── */}
       {view === VIEWS.STUDY && (
-        <div style={{ maxWidth: isLarge ? '640px' : isDesktop ? '560px' : 'none', margin: isDesktop ? '0 auto' : '0' }}>
+        <div style={{ maxWidth: isXLarge ? '740px' : isLarge ? '640px' : isDesktop ? '560px' : 'none', margin: isDesktop ? '0 auto' : '0' }}>
           {cameFromMap && (
             <button onClick={backToMap} style={{
               marginBottom:'14px', padding:'8px 14px', background:'#111827', border:'1px solid #1e2538',
@@ -417,7 +429,7 @@ export default function App() {
           </p>
 
           {/* Card */}
-          <div onClick={flipCard} style={{ perspective:'1000px', height: isLarge ? '360px' : isDesktop ? '300px' : '220px', cursor:'pointer', marginBottom:'14px' }}>
+          <div onClick={flipCard} style={{ perspective:'1000px', height: isXLarge ? '420px' : isLarge ? '360px' : isDesktop ? '300px' : '220px', cursor:'pointer', marginBottom:'14px' }}>
             <div style={{
               width:'100%', height:'100%', position:'relative', transformStyle:'preserve-3d',
               transition:'transform 0.5s cubic-bezier(0.23,1,0.32,1)',
@@ -427,13 +439,13 @@ export default function App() {
                 position:'absolute', width:'100%', height:'100%', backfaceVisibility:'hidden',
                 borderRadius:'16px', background:`linear-gradient(145deg,${colors.bg},#0a0a0f)`,
                 border:`1px solid ${colors.accent}22`, display:'flex', flexDirection:'column',
-                alignItems:'center', justifyContent:'center', padding: isDesktop ? '36px' : '24px', boxSizing:'border-box',
+                alignItems:'center', justifyContent:'center', padding: isXLarge ? '48px' : isDesktop ? '36px' : '24px', boxSizing:'border-box',
                 boxShadow:`0 0 40px ${colors.accent}15`,
               }}>
                 <span style={{ fontSize:'11px', fontWeight:'600', letterSpacing:'1.5px', color:colors.accent, opacity:0.7, marginBottom:'14px', textTransform:'uppercase' }}>
                   {CATEGORY_EMOJI[currentCard?.category]||'✨'} {currentCard?.category}
                 </span>
-                <p style={{ fontSize: isDesktop ? '22px' : '19px', fontWeight:'500', textAlign:'center', margin:0, lineHeight:1.5, color:'#f1f5f9' }}>
+                <p style={{ fontSize: isXLarge ? '27px' : isDesktop ? '22px' : '19px', fontWeight:'500', textAlign:'center', margin:0, lineHeight:1.5, color:'#f1f5f9' }}>
                   {currentCard?.question}
                 </p>
               </div>
@@ -441,11 +453,11 @@ export default function App() {
                 position:'absolute', width:'100%', height:'100%', backfaceVisibility:'hidden',
                 borderRadius:'16px', background:`linear-gradient(145deg,${colors.bg},#0a0a0f)`,
                 border:`1.5px solid ${colors.accent}55`, display:'flex', flexDirection:'column',
-                alignItems:'center', justifyContent:'center', padding: isDesktop ? '36px' : '24px', boxSizing:'border-box',
+                alignItems:'center', justifyContent:'center', padding: isXLarge ? '48px' : isDesktop ? '36px' : '24px', boxSizing:'border-box',
                 transform:'rotateY(180deg)', boxShadow:`0 0 50px ${colors.accent}25`,
               }}>
                 <span style={{ fontSize:'11px', fontWeight:'600', letterSpacing:'1.5px', color:colors.accent, opacity:0.7, marginBottom:'14px', textTransform:'uppercase' }}>Answer</span>
-                <p style={{ fontSize: isDesktop ? '24px' : '21px', fontWeight:'600', textAlign:'center', margin:0, lineHeight:1.4, color:colors.accent }}>
+                <p style={{ fontSize: isXLarge ? '30px' : isDesktop ? '24px' : '21px', fontWeight:'600', textAlign:'center', margin:0, lineHeight:1.4, color:colors.accent }}>
                   {currentCard?.answer}
                 </p>
               </div>
@@ -482,7 +494,7 @@ export default function App() {
 
       {/* ── STATS VIEW ── */}
       {view === VIEWS.STATS && (
-        <div style={{ maxWidth: isLarge ? '760px' : isDesktop ? '640px' : 'none', margin: isDesktop ? '0 auto' : '0' }}>
+        <div style={{ maxWidth: isXLarge ? '960px' : isLarge ? '760px' : isDesktop ? '640px' : 'none', margin: isDesktop ? '0 auto' : '0' }}>
           <div style={{
             display:'grid', gridTemplateColumns: isDesktop ? 'repeat(3,1fr)' : 'repeat(2,1fr)', gap:'12px', marginBottom:'20px',
           }}>
@@ -534,7 +546,7 @@ export default function App() {
 
       {/* ── MANAGE VIEW ── */}
       {view === VIEWS.MANAGE && (
-        <div style={{ maxWidth: isLarge ? '880px' : isDesktop ? '720px' : 'none', margin: isDesktop ? '0 auto' : '0' }}>
+        <div style={{ maxWidth: isXLarge ? '1100px' : isLarge ? '880px' : isDesktop ? '720px' : 'none', margin: isDesktop ? '0 auto' : '0' }}>
           <div style={{ display:'flex', gap:'10px', marginBottom:'16px', flexWrap:'wrap' }}>
             <button onClick={() => setShowForm(f => !f)} style={{
               padding:'10px 16px', borderRadius:'10px', border:'1.5px solid #818cf855',
@@ -568,7 +580,7 @@ export default function App() {
             </div>
           )}
 
-          <div style={{ display:'grid', gridTemplateColumns: isDesktop ? 'repeat(2,1fr)' : '1fr', gap:'10px' }}>
+          <div style={{ display:'grid', gridTemplateColumns: isXLarge ? 'repeat(3,1fr)' : isDesktop ? 'repeat(2,1fr)' : '1fr', gap:'10px' }}>
             {cards.map(card => {
               const cc = getCat(card.category);
               return (
@@ -619,14 +631,14 @@ export default function App() {
   );
 
   return (
-    <div style={{ fontFamily:"'Segoe UI',system-ui,sans-serif", minHeight:'100vh', background:'#0a0a0f', color:'#e2e8f0', padding: isLarge ? '56px' : isDesktop ? '40px' : '20px 16px', boxSizing:'border-box' }}>
-      <div style={{ maxWidth: isLarge ? '1280px' : isDesktop ? '980px' : '520px', margin:'0 auto' }}>
+    <div style={{ fontFamily:"'Segoe UI',system-ui,sans-serif", minHeight:'100vh', background:'#0a0a0f', color:'#e2e8f0', padding: isXLarge ? '64px 80px' : isLarge ? '56px' : isDesktop ? '40px' : '20px 16px', boxSizing:'border-box' }}>
+      <div style={{ maxWidth: isXLarge ? '1600px' : isLarge ? '1280px' : isDesktop ? '980px' : '520px', margin:'0 auto' }}>
 
         {/* Header */}
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom: isLarge ? '40px' : isDesktop ? '32px' : '20px' }}>
           <div>
-            <h1 style={{ fontSize: isLarge ? '32px' : isDesktop ? '26px' : '20px', fontWeight:'700', margin:0, letterSpacing:'-0.5px' }}>Flashcards</h1>
-            <p style={{ color:'#334155', fontSize: isLarge ? '14px' : isDesktop ? '13px' : '12px', margin:0 }}>{cards.length} cards · 🔥 {streak.count} day streak</p>
+            <h1 style={{ fontSize: isXLarge ? '38px' : isLarge ? '32px' : isDesktop ? '26px' : '20px', fontWeight:'700', margin:0, letterSpacing:'-0.5px' }}>Flashcards</h1>
+            <p style={{ color:'#334155', fontSize: isXLarge ? '15px' : isLarge ? '14px' : isDesktop ? '13px' : '12px', margin:0 }}>{cards.length} cards · 🔥 {streak.count} day streak</p>
           </div>
           {!isDesktop && (
             <div style={{ display:'flex', gap:'4px', background:'#111827', borderRadius:'10px', padding:'4px' }}>
@@ -638,9 +650,9 @@ export default function App() {
           )}
         </div>
 
-        <div style={{ display:'flex', gap: isLarge ? '44px' : isDesktop ? '32px' : '0', alignItems:'flex-start' }}>
+        <div style={{ display:'flex', gap: isXLarge ? '56px' : isLarge ? '44px' : isDesktop ? '32px' : '0', alignItems:'flex-start' }}>
           {isDesktop && (
-            <div style={{ display:'flex', flexDirection:'column', gap: isLarge ? '6px' : '4px', background:'#111827', borderRadius:'14px', padding: isLarge ? '14px' : '10px', width: isLarge ? '200px' : '168px', flexShrink:0, position:'sticky', top: isLarge ? '56px' : '40px' }}>
+            <div style={{ display:'flex', flexDirection:'column', gap: isLarge ? '6px' : '4px', background:'#111827', borderRadius:'14px', padding: isXLarge ? '18px' : isLarge ? '14px' : '10px', width: isXLarge ? '232px' : isLarge ? '200px' : '168px', flexShrink:0, position:'sticky', top: isLarge ? '56px' : '40px' }}>
               {navBtn('Map', VIEWS.MAP)}
               {navBtn('Study', VIEWS.STUDY)}
               {navBtn('Stats', VIEWS.STATS)}
