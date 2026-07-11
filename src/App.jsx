@@ -67,8 +67,20 @@ function useIsDesktop() {
   return isDesktop;
 }
 
+// wide desktop (e.g. MacBook Pro 14"/16" — 1512px+/1728px+ viewports)
+function useIsLarge() {
+  const [isLarge, setIsLarge] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 1280);
+  useEffect(() => {
+    const fn = () => setIsLarge(window.innerWidth >= 1280);
+    window.addEventListener('resize', fn);
+    return () => window.removeEventListener('resize', fn);
+  }, []);
+  return isLarge;
+}
+
 export default function App() {
   const isDesktop = useIsDesktop();
+  const isLarge = useIsLarge();
 
   const [cards, setCards] = useState(() => {
     try { const s = localStorage.getItem('fc_v3'); return s ? JSON.parse(s) : starterCards; }
@@ -352,7 +364,7 @@ export default function App() {
 
       {/* ── STUDY VIEW ── */}
       {view === VIEWS.STUDY && (
-        <div style={{ maxWidth: isDesktop ? '560px' : 'none', margin: isDesktop ? '0 auto' : '0' }}>
+        <div style={{ maxWidth: isLarge ? '640px' : isDesktop ? '560px' : 'none', margin: isDesktop ? '0 auto' : '0' }}>
           {cameFromMap && (
             <button onClick={backToMap} style={{
               marginBottom:'14px', padding:'8px 14px', background:'#111827', border:'1px solid #1e2538',
@@ -405,7 +417,7 @@ export default function App() {
           </p>
 
           {/* Card */}
-          <div onClick={flipCard} style={{ perspective:'1000px', height: isDesktop ? '300px' : '220px', cursor:'pointer', marginBottom:'14px' }}>
+          <div onClick={flipCard} style={{ perspective:'1000px', height: isLarge ? '360px' : isDesktop ? '300px' : '220px', cursor:'pointer', marginBottom:'14px' }}>
             <div style={{
               width:'100%', height:'100%', position:'relative', transformStyle:'preserve-3d',
               transition:'transform 0.5s cubic-bezier(0.23,1,0.32,1)',
@@ -470,7 +482,7 @@ export default function App() {
 
       {/* ── STATS VIEW ── */}
       {view === VIEWS.STATS && (
-        <div style={{ maxWidth: isDesktop ? '640px' : 'none', margin: isDesktop ? '0 auto' : '0' }}>
+        <div style={{ maxWidth: isLarge ? '760px' : isDesktop ? '640px' : 'none', margin: isDesktop ? '0 auto' : '0' }}>
           <div style={{
             display:'grid', gridTemplateColumns: isDesktop ? 'repeat(3,1fr)' : 'repeat(2,1fr)', gap:'12px', marginBottom:'20px',
           }}>
@@ -522,7 +534,7 @@ export default function App() {
 
       {/* ── MANAGE VIEW ── */}
       {view === VIEWS.MANAGE && (
-        <div style={{ maxWidth: isDesktop ? '720px' : 'none', margin: isDesktop ? '0 auto' : '0' }}>
+        <div style={{ maxWidth: isLarge ? '880px' : isDesktop ? '720px' : 'none', margin: isDesktop ? '0 auto' : '0' }}>
           <div style={{ display:'flex', gap:'10px', marginBottom:'16px', flexWrap:'wrap' }}>
             <button onClick={() => setShowForm(f => !f)} style={{
               padding:'10px 16px', borderRadius:'10px', border:'1.5px solid #818cf855',
@@ -607,14 +619,14 @@ export default function App() {
   );
 
   return (
-    <div style={{ fontFamily:"'Segoe UI',system-ui,sans-serif", minHeight:'100vh', background:'#0a0a0f', color:'#e2e8f0', padding: isDesktop ? '40px' : '20px 16px', boxSizing:'border-box' }}>
-      <div style={{ maxWidth: isDesktop ? '980px' : '520px', margin:'0 auto' }}>
+    <div style={{ fontFamily:"'Segoe UI',system-ui,sans-serif", minHeight:'100vh', background:'#0a0a0f', color:'#e2e8f0', padding: isLarge ? '56px' : isDesktop ? '40px' : '20px 16px', boxSizing:'border-box' }}>
+      <div style={{ maxWidth: isLarge ? '1280px' : isDesktop ? '980px' : '520px', margin:'0 auto' }}>
 
         {/* Header */}
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom: isDesktop ? '32px' : '20px' }}>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom: isLarge ? '40px' : isDesktop ? '32px' : '20px' }}>
           <div>
-            <h1 style={{ fontSize: isDesktop ? '26px' : '20px', fontWeight:'700', margin:0, letterSpacing:'-0.5px' }}>Flashcards</h1>
-            <p style={{ color:'#334155', fontSize: isDesktop ? '13px' : '12px', margin:0 }}>{cards.length} cards · 🔥 {streak.count} day streak</p>
+            <h1 style={{ fontSize: isLarge ? '32px' : isDesktop ? '26px' : '20px', fontWeight:'700', margin:0, letterSpacing:'-0.5px' }}>Flashcards</h1>
+            <p style={{ color:'#334155', fontSize: isLarge ? '14px' : isDesktop ? '13px' : '12px', margin:0 }}>{cards.length} cards · 🔥 {streak.count} day streak</p>
           </div>
           {!isDesktop && (
             <div style={{ display:'flex', gap:'4px', background:'#111827', borderRadius:'10px', padding:'4px' }}>
@@ -626,9 +638,9 @@ export default function App() {
           )}
         </div>
 
-        <div style={{ display:'flex', gap: isDesktop ? '32px' : '0', alignItems:'flex-start' }}>
+        <div style={{ display:'flex', gap: isLarge ? '44px' : isDesktop ? '32px' : '0', alignItems:'flex-start' }}>
           {isDesktop && (
-            <div style={{ display:'flex', flexDirection:'column', gap:'4px', background:'#111827', borderRadius:'14px', padding:'10px', width:'168px', flexShrink:0, position:'sticky', top:'40px' }}>
+            <div style={{ display:'flex', flexDirection:'column', gap: isLarge ? '6px' : '4px', background:'#111827', borderRadius:'14px', padding: isLarge ? '14px' : '10px', width: isLarge ? '200px' : '168px', flexShrink:0, position:'sticky', top: isLarge ? '56px' : '40px' }}>
               {navBtn('Map', VIEWS.MAP)}
               {navBtn('Study', VIEWS.STUDY)}
               {navBtn('Stats', VIEWS.STATS)}
