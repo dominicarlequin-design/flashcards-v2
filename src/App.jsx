@@ -632,7 +632,7 @@ export default function App() {
 
   return (
     <div style={{ fontFamily:"'Segoe UI',system-ui,sans-serif", minHeight:'100vh', background:'#0a0a0f', color:'#e2e8f0', padding: isXLarge ? '64px 80px' : isLarge ? '56px' : isDesktop ? '40px' : '20px 16px', boxSizing:'border-box' }}>
-      <div style={{ maxWidth: isXLarge ? '1600px' : isLarge ? '1280px' : isDesktop ? '980px' : '520px', margin:'0 auto' }}>
+      <div style={{ maxWidth: isDesktop ? 'none' : '520px', margin:'0 auto' }}>
 
         {/* Header */}
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom: isLarge ? '40px' : isDesktop ? '32px' : '20px' }}>
