@@ -1,16 +1,37 @@
-flashcards-v2-ten.vercel.app
+# Flashcards v2
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An AI-powered spaced repetition app. Turn a PDF into a full flashcard deck, then study using a Leitner box system with a gamified level map to track progress.
 
-Currently, two official plugins are available:
+**Live app:** [flashcards-v2-ten.vercel.app](https://flashcards-v2-ten.vercel.app)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## What it does
 
-## React Compiler
+- **PDF → Flashcards** — upload a PDF and generate a study deck from it automatically
+- **Leitner box system** — cards move between boxes based on how well you know them, so you review weak spots more often
+- **Level map** — gamified progress view, saved locally via `localStorage`
+- **Built with** React 19 + Vite
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Project structure
 
-## Expanding the ESLint configuration
+```
+src/
+  App.jsx       # main app shell
+  hooks/        # custom React hooks
+  data/         # starter/seed flashcard data
+  assets/       # static assets
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+> Note: `App.jsx` is currently being refactored from a single monolithic file into smaller, feature-based components. Structure above will keep evolving as that's finished.
+
+## Running locally
+
+```bash
+npm install
+npm run dev
+```
+
+## Build
+
+```bash
+npm run build
+```
