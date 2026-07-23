@@ -782,7 +782,7 @@ export default function App() {
               <p style={{ margin:0, fontSize:'12px', color:'#64748b' }}>Mastered</p>
             </div>
             <div style={{ background:'#111827', borderRadius:'14px', padding:'18px', textAlign:'center', gridColumn: isDesktop ? 'auto' : 'span 2' }}>
-              <p style={{ margin:0, fontSize:'26px', fontWeight:'700', color:'#fbbf24' }}>\u{1F525} {streak.count}</p>
+              <p style={{ margin:0, fontSize:'26px', fontWeight:'700', color:'#fbbf24' }}>🔥 {streak.count}</p>
               <p style={{ margin:0, fontSize:'12px', color:'#64748b' }}>Day Streak</p>
             </div>
           </div>
@@ -830,12 +830,12 @@ export default function App() {
             <button onClick={exportCards} style={{
               padding:'10px 16px', borderRadius:'10px', border:'1px solid #1e2538',
               background:'transparent', color:'#94a3b8', fontSize:'13px', cursor:'pointer',
-            }}>\u{1F4E4} Export</button>
+            }}>📤 Export</button>
             <label style={{
               padding:'10px 16px', borderRadius:'10px', border:'1px solid #1e2538',
               background:'transparent', color:'#94a3b8', fontSize:'13px', cursor:'pointer',
             }}>
-              \u{1F4E5} Import
+              📥 Import
               <input type="file" accept="application/json" onChange={importCards} style={{ display:'none' }} />
             </label>
             {importMsg && <span style={{ fontSize:'12px', color:'#94a3b8', alignSelf:'center' }}>{importMsg}</span>}
@@ -865,8 +865,8 @@ export default function App() {
                       {CATEGORY_EMOJI[card.category]||'\u2728'} {card.category}
                     </span>
                     <div style={{ display:'flex', gap:'4px', flexShrink:0 }}>
-                      <button onClick={() => openEdit(card)} style={{ background:'none', border:'none', cursor:'pointer', fontSize:'14px', opacity:0.7 }}>\u270F\uFE0F</button>
-                      <button onClick={() => deleteCard(card.id)} style={{ background:'none', border:'none', cursor:'pointer', fontSize:'14px', opacity:0.7 }}>\u{1F5D1}\uFE0F</button>
+                      <button onClick={() => openEdit(card)} style={{ background:'none', border:'none', cursor:'pointer', fontSize:'14px', opacity:0.7 }}>✏️</button>
+                      <button onClick={() => deleteCard(card.id)} style={{ background:'none', border:'none', cursor:'pointer', fontSize:'14px', opacity:0.7 }}>🗑️\uFE0F</button>
                     </div>
                   </div>
                   <p style={{ margin:'8px 0 4px', fontSize:'14px', color:'#f1f5f9', fontWeight:'500' }}>{card.question}</p>
@@ -913,7 +913,7 @@ export default function App() {
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom: isLarge ? '40px' : isDesktop ? '32px' : '20px' }}>
           <div>
             <h1 style={{ fontSize: isXLarge ? '38px' : isLarge ? '32px' : isDesktop ? '26px' : '20px', fontWeight:'700', margin:0, letterSpacing:'-0.5px' }}>Flashcards</h1>
-            <p style={{ color:'#334155', fontSize: isXLarge ? '15px' : isLarge ? '14px' : isDesktop ? '13px' : '12px', margin:0 }}>{cards.length} cards \u00B7 \u{1F525} {streak.count} day streak</p>
+            <p style={{ color:'#334155', fontSize: isXLarge ? '15px' : isLarge ? '14px' : isDesktop ? '13px' : '12px', margin:0 }}>{cards.length} cards · 🔥 {streak.count} day streak</p>
           </div>
           {!isDesktop && (
             <div style={{ display:'flex', gap:'4px', background:'#111827', borderRadius:'10px', padding:'4px' }}>
