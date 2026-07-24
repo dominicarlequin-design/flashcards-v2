@@ -6,10 +6,8 @@ import StudyView from './components/views/StudyView';
 import StatsView from './components/views/StatsView';
 import ManageView from './components/views/ManageView';
 import starterCards from './data/startercards';
-import { ALL_CATEGORY, LEVEL_ORDER, getCat } from './data/categories';
-
-// \u2500\u2500 views \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-const VIEWS = { HOME: 'home', MAP: 'map', STUDY: 'study', STATS: 'stats', MANAGE: 'manage' };
+import { ALL_CATEGORY, LEVEL_ORDER, getCat } from './constants/categories';
+import { VIEWS } from './constants/views';
 
 export default function App() {
   const isDesktop = useIsDesktop();

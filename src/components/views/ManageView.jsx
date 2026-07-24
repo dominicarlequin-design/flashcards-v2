@@ -1,4 +1,4 @@
-import { LEVEL_ORDER, CATEGORY_EMOJI, getCat } from '../../data/categories';
+import { LEVEL_ORDER, CATEGORY_EMOJI, getCat } from '../../constants/categories';
 
 const inputStyle = {
   width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: '8px',

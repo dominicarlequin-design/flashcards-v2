@@ -1,4 +1,4 @@
-import { LEVEL_ORDER, CATEGORY_EMOJI, getCat } from '../../data/categories';
+import { LEVEL_ORDER, CATEGORY_EMOJI, getCat } from '../../constants/categories';
 
 export default function MapView({ isDesktop, isLarge, isXLarge, isLevelUnlocked, isLevelComplete, enterLevel }) {
   return (

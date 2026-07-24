@@ -1,4 +1,4 @@
-import { ALL_CATEGORY, CATEGORY_EMOJI, getCat } from '../../data/categories';
+import { ALL_CATEGORY, CATEGORY_EMOJI, getCat } from '../../constants/categories';
 
 export default function StudyView({
   isDesktop, isLarge, isXLarge,
