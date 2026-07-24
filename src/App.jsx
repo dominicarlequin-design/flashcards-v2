@@ -31,7 +31,7 @@ export default function App() {
   // session results: { [cardId]: 'know' | 'dontknow' }
   const [results, setResults] = useState({});
 
-  // permanent mastery \u2014 persists across sessions, drives level unlocking
+  // permanent mastery — persists across sessions, drives level unlocking
   const [masteredIds, setMasteredIds] = useState(() => {
     try { const s = localStorage.getItem('fc_mastered_v2'); return s ? JSON.parse(s) : []; }
     catch { return []; }
@@ -91,10 +91,10 @@ export default function App() {
           .map(c => ({ ...c, id: c.id || Date.now() + Math.random() }))
           .filter(c => !existingQs.has(c.question.toLowerCase()));
         setCards(prev => [...prev, ...newCards]);
-        setImportMsg(`\u2705 Imported ${newCards.length} new card${newCards.length !== 1 ? 's' : ''}!`);
+        setImportMsg(`✅ Imported ${newCards.length} new card${newCards.length !== 1 ? 's' : ''}!`);
         setTimeout(() => setImportMsg(''), 3000);
       } catch {
-        setImportMsg('\u274C Invalid file \u2014 make sure it\'s a flashcards JSON');
+        setImportMsg('❌ Invalid file — make sure it\'s a flashcards JSON');
         setTimeout(() => setImportMsg(''), 3000);
       }
     };
@@ -182,6 +182,17 @@ export default function App() {
     setTimeout(() => setJustAdded(false), 2000);
   };
 
+  const addCardsBulk = (newCards) => {
+    if (!newCards || newCards.length === 0) return;
+    const withIds = newCards.map((c, i) => ({
+      id: Date.now() + i,
+      question: c.question,
+      answer: c.answer,
+      category: c.category || 'Custom',
+    }));
+    setCards(prev => [...prev, ...withIds]);
+  };
+
   const deleteCard = (id) => {
     setCards(prev => prev.filter(c => c.id !== id));
     setResults(prev => { const n = {...prev}; delete n[id]; return n; });
@@ -212,7 +223,7 @@ export default function App() {
   // overall mastery across all cards (for Stats view)
   const overallMastery = cards.length ? Math.round((masteredIds.length / cards.length) * 100) : 0;
 
-  // \u2500\u2500 LEVEL / MAP LOGIC \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+  // ── LEVEL / MAP LOGIC ──────────────────────────────
   const isLevelComplete = (cat) => {
     const catCards = cards.filter(c => c.category === cat);
     if (!catCards.length) return false;
@@ -255,7 +266,7 @@ export default function App() {
 
   const content = (
     <>
-      {/* \u2500\u2500 HOME VIEW \u2500\u2500 */}
+      {/* ── HOME VIEW ── */}
       {view === VIEWS.HOME && (
         <HomeView
           isDesktop={isDesktop}
@@ -265,7 +276,7 @@ export default function App() {
         />
       )}
 
-      {/* \u2500\u2500 MAP VIEW \u2500\u2500 */}
+      {/* ── MAP VIEW ── */}
       {view === VIEWS.MAP && (
         <MapView
           isDesktop={isDesktop}
@@ -277,7 +288,7 @@ export default function App() {
         />
       )}
 
-      {/* \u2500\u2500 STUDY VIEW \u2500\u2500 */}
+      {/* ── STUDY VIEW ── */}
       {view === VIEWS.STUDY && (
         <StudyView
           isDesktop={isDesktop}
@@ -311,7 +322,7 @@ export default function App() {
         />
       )}
 
-      {/* \u2500\u2500 STATS VIEW \u2500\u2500 */}
+      {/* ── STATS VIEW ── */}
       {view === VIEWS.STATS && (
         <StatsView
           isDesktop={isDesktop}
@@ -324,7 +335,7 @@ export default function App() {
         />
       )}
 
-      {/* \u2500\u2500 MANAGE VIEW \u2500\u2500 */}
+      {/* ── MANAGE VIEW ── */}
       {view === VIEWS.MANAGE && (
         <ManageView
           isDesktop={isDesktop}
@@ -343,6 +354,7 @@ export default function App() {
           newCat={newCat}
           setNewCat={setNewCat}
           addCard={addCard}
+          addCardsBulk={addCardsBulk}
           justAdded={justAdded}
           openEdit={openEdit}
           deleteCard={deleteCard}
