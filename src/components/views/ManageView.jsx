@@ -1,4 +1,4 @@
-import { LEVEL_ORDER, CATEGORY_EMOJI, getCat } from '../../constants/categories';
+import { CATEGORY_LIST, CATEGORY_EMOJI, getCat } from '../../constants/categories';
 
 const inputStyle = {
   width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: '8px',
@@ -39,7 +39,7 @@ export default function ManageView({
           <textarea placeholder="Question" value={newQ} onChange={e => setNewQ(e.target.value)} rows={2} style={{ ...inputStyle, resize:'vertical' }} />
           <textarea placeholder="Answer" value={newA} onChange={e => setNewA(e.target.value)} rows={2} style={{ ...inputStyle, resize:'vertical' }} />
           <select value={newCat} onChange={e => setNewCat(e.target.value)} style={inputStyle}>
-            {[...LEVEL_ORDER, 'Custom'].map(c => <option key={c} value={c}>{c}</option>)}
+            {[...CATEGORY_LIST, 'Custom'].map(c => <option key={c} value={c}>{c}</option>)}
           </select>
           <button onClick={addCard} style={{
             padding:'10px 16px', borderRadius:'8px', border:'none',
@@ -78,7 +78,7 @@ export default function ManageView({
             <textarea value={editQ} onChange={e => setEditQ(e.target.value)} rows={2} style={{ ...inputStyle, resize:'vertical' }} />
             <textarea value={editA} onChange={e => setEditA(e.target.value)} rows={2} style={{ ...inputStyle, resize:'vertical' }} />
             <select value={editCat} onChange={e => setEditCat(e.target.value)} style={inputStyle}>
-              {[...LEVEL_ORDER, 'Custom'].map(c => <option key={c} value={c}>{c}</option>)}
+              {[...CATEGORY_LIST, 'Custom'].map(c => <option key={c} value={c}>{c}</option>)}
             </select>
             <div style={{ display:'flex', gap:'10px' }}>
               <button onClick={() => setEditCard(null)} style={{

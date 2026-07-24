@@ -1,4 +1,4 @@
-import { LEVEL_ORDER, CATEGORY_EMOJI, getCat } from '../../constants/categories';
+import { CATEGORY_LIST, CATEGORY_EMOJI, getCat } from '../../constants/categories';
 
 export default function StatsView({ isDesktop, isLarge, isXLarge, cards, masteredIds, streak, overallMastery }) {
   return (
@@ -31,7 +31,7 @@ export default function StatsView({ isDesktop, isLarge, isXLarge, cards, mastere
       </div>
 
       <div style={{ display:'grid', gridTemplateColumns: isDesktop ? 'repeat(2,1fr)' : '1fr', gap:'10px' }}>
-        {LEVEL_ORDER.filter(cat => cards.some(c => c.category === cat)).map(cat => {
+        {CATEGORY_LIST.filter(cat => cards.some(c => c.category === cat)).map(cat => {
           const cc = getCat(cat);
           const catCards = cards.filter(c => c.category === cat);
           const catMastered = catCards.filter(c => masteredIds.includes(c.id)).length;

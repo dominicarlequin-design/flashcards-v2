@@ -1,5 +1,8 @@
 export const ALL_CATEGORY = 'All';
-export const LEVEL_ORDER = ['JavaScript', 'Python', 'Java', 'C++', 'Go', 'React'];
+export const LEVEL_ORDER = ['JavaScript', 'Python', 'Java', 'C++', 'Go'];
+// full set of real (non-Custom) categories, including React — which has
+// its own card deck but sits outside the Map's level-unlock progression
+export const CATEGORY_LIST = [...LEVEL_ORDER, 'React'];
 
 export const CATEGORY_COLORS = {
   JavaScript: { bg: '#2d2a0e', accent: '#facc15', pill: '#4a4400' },

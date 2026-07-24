@@ -382,7 +382,7 @@ export default function App() {
         </div>
 
         <div style={{ display:'flex', gap: isXLarge ? '56px' : isLarge ? '44px' : isDesktop ? '32px' : '0', alignItems:'flex-start' }}>
-          {isDesktop && (
+          {isDesktop && view !== VIEWS.HOME && (
             <div style={{ display:'flex', flexDirection:'column', gap: isLarge ? '6px' : '4px', background:'#111827', borderRadius:'14px', padding: isXLarge ? '18px' : isLarge ? '14px' : '10px', width: isXLarge ? '232px' : isLarge ? '200px' : '168px', flexShrink:0, position:'sticky', top: isLarge ? '56px' : '40px' }}>
               {navBtn('Home', VIEWS.HOME)}
               {navBtn('Map', VIEWS.MAP)}
