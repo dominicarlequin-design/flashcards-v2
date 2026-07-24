@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { CATEGORY_LIST, CATEGORY_EMOJI, getCat } from '../../constants/categories';
+import PdfImportPanel from './PdfImportPanel';
 
 const inputStyle = {
   width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: '8px',
@@ -12,7 +14,10 @@ export default function ManageView({
   newQ, setNewQ, newA, setNewA, newCat, setNewCat, addCard, justAdded,
   openEdit, deleteCard,
   editCard, setEditCard, editQ, setEditQ, editA, setEditA, editCat, setEditCat, saveEdit,
+  addCardsBulk,
 }) {
+  const [showPdfImport, setShowPdfImport] = useState(false);
+
   return (
     <div style={{ maxWidth: isXLarge ? '1100px' : isLarge ? '880px' : isDesktop ? '720px' : 'none', margin: isDesktop ? '0 auto' : '0' }}>
       <div style={{ display:'flex', gap:'10px', marginBottom:'16px', flexWrap:'wrap' }}>
@@ -31,8 +36,16 @@ export default function ManageView({
           📥 Import
           <input type="file" accept="application/json" onChange={importCards} style={{ display:'none' }} />
         </label>
+        <button onClick={() => setShowPdfImport(v => !v)} style={{
+          padding:'10px 16px', borderRadius:'10px', border:'1.5px solid #818cf855',
+          background:'#818cf81a', color:'#818cf8', fontSize:'13px', fontWeight:'600', cursor:'pointer',
+        }}>{showPdfImport ? '× Close' : '📄 Import PDF'}</button>
         {importMsg && <span style={{ fontSize:'12px', color:'#94a3b8', alignSelf:'center' }}>{importMsg}</span>}
       </div>
+
+      {showPdfImport && (
+        <PdfImportPanel addCardsBulk={addCardsBulk} onClose={() => setShowPdfImport(false)} />
+      )}
 
       {showForm && (
         <div style={{ background:'#111827', borderRadius:'14px', padding:'16px', marginBottom:'20px' }}>
