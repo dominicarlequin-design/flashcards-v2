@@ -2,7 +2,7 @@ import BrainCanvas from '../BrainCanvas';
 
 export default function HomeView({ isDesktop, isLarge, isXLarge, onStartStudying }) {
   return (
-    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', minHeight: isDesktop ? '60vh' : '50vh', padding: isDesktop ? '40px 20px' : '20px 10px' }}>
+    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', minHeight: isDesktop ? '60vh' : '50vh', padding: isDesktop ? '40px 20px' : '20px 10px', marginLeft: isXLarge ? '-144px' : isLarge ? '-122px' : isDesktop ? '-100px' : 0 }}>
       <div style={{ marginBottom:'20px' }}>
         <BrainCanvas size={isXLarge ? 200 : isDesktop ? 168 : 130} />
       </div>
