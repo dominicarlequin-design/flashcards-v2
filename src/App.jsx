@@ -13,7 +13,6 @@ export default function App() {
   const isDesktop = useIsDesktop();
   const isLarge = useIsLarge();
   const isXLarge = useIsXLarge();
-  const isXLarge = useIsXLarge();
 
   const [cards, setCards] = useState(() => {
     try {
@@ -32,11 +31,8 @@ export default function App() {
   // session results: { [cardId]: 'know' | 'dontknow' }
   const [results, setResults] = useState({});
 
-  // permanent mastery \u2014 persists across sessions, drives level unlocking
-  // permanent mastery \u2014 persists across sessions, drives level unlocking
   // permanent mastery — persists across sessions, drives level unlocking
   const [masteredIds, setMasteredIds] = useState(() => {
-    try { const s = localStorage.getItem('fc_mastered_v2'); return s ? JSON.parse(s) : []; }
     try { const s = localStorage.getItem('fc_mastered_v2'); return s ? JSON.parse(s) : []; }
     catch { return []; }
   });
@@ -47,11 +43,9 @@ export default function App() {
   });
 
   const [view, setView] = useState(VIEWS.HOME);
-  const [view, setView] = useState(VIEWS.HOME);
   const [activeCategory, setActiveCategory] = useState(ALL_CATEGORY);
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
-  const [answerTab, setAnswerTab] = useState('answer');
   const [answerTab, setAnswerTab] = useState('answer');
   const [cameFromMap, setCameFromMap] = useState(false);
 
@@ -98,15 +92,9 @@ export default function App() {
           .filter(c => !existingQs.has(c.question.toLowerCase()));
         setCards(prev => [...prev, ...newCards]);
         setImportMsg(`\u2705 Imported ${newCards.length} new card${newCards.length !== 1 ? 's' : ''}!`);
-        setImportMsg(`\u2705 Imported ${newCards.length} new card${newCards.length !== 1 ? 's' : ''}!`);
         setTimeout(() => setImportMsg(''), 3000);
       } catch {
         setImportMsg('\u274C Invalid file \u2014 make sure it\'s a flashcards JSON');
-        setImportMsg('\u274C Invalid file \u2014 make sure it\'s a flashcards JSON');
-        setImportMsg(`✅ Imported ${newCards.length} new card${newCards.length !== 1 ? 's' : ''}!`);
-        setTimeout(() => setImportMsg(''), 3000);
-      } catch {
-        setImportMsg('❌ Invalid file — make sure it\'s a flashcards JSON');
         setTimeout(() => setImportMsg(''), 3000);
       }
     };
@@ -121,10 +109,8 @@ export default function App() {
 
   // persist cards
   useEffect(() => { localStorage.setItem('fc_v5', JSON.stringify(cards)); }, [cards]);
-  useEffect(() => { localStorage.setItem('fc_v5', JSON.stringify(cards)); }, [cards]);
 
   // persist mastered ids
-  useEffect(() => { localStorage.setItem('fc_mastered_v2', JSON.stringify(masteredIds)); }, [masteredIds]);
   useEffect(() => { localStorage.setItem('fc_mastered_v2', JSON.stringify(masteredIds)); }, [masteredIds]);
 
   // streak logic
@@ -413,7 +399,6 @@ export default function App() {
           </div>
           {!isDesktop && (
             <div style={{ display:'flex', gap:'4px', background:'#111827', borderRadius:'10px', padding:'4px' }}>
-              {navBtn('Home', VIEWS.HOME)}
               {navBtn('Home', VIEWS.HOME)}
               {navBtn('Map', VIEWS.MAP)}
               {navBtn('Study', VIEWS.STUDY)}
