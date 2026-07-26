@@ -261,6 +261,7 @@ export default function App() {
       fontWeight: view === v ? '600' : '400',
       textAlign: isDesktop ? 'left' : 'center',
       width: isDesktop ? '100%' : 'auto',
+      flex: isDesktop ? 'none' : '1',
     }}>{label}</button>
   );
 
@@ -394,13 +395,18 @@ export default function App() {
       <div style={{ maxWidth: isDesktop ? `${containerMaxW}px` : '520px', margin:'0 auto' }}>
 
         {/* Header */}
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom: isLarge ? '40px' : isDesktop ? '32px' : '20px' }}>
+        <div style={{
+          display:'flex', flexDirection: isDesktop ? 'row' : 'column',
+          alignItems: isDesktop ? 'center' : 'stretch', justifyContent:'space-between',
+          gap: isDesktop ? '0' : '12px',
+          marginBottom: isLarge ? '40px' : isDesktop ? '32px' : '20px',
+        }}>
           <div>
             <h1 style={{ fontSize: isXLarge ? '38px' : isLarge ? '32px' : isDesktop ? '26px' : '20px', fontWeight:'700', margin:0, letterSpacing:'-0.5px' }}>Flashcards</h1>
             <p style={{ color:'#334155', fontSize: isXLarge ? '15px' : isLarge ? '14px' : isDesktop ? '13px' : '12px', margin:0 }}>{cards.length} cards · 🔥 {streak.count} day streak</p>
           </div>
           {!isDesktop && (
-            <div style={{ display:'flex', gap:'4px', background:'#111827', borderRadius:'10px', padding:'4px' }}>
+            <div style={{ display:'flex', gap:'4px', background:'#111827', borderRadius:'10px', padding:'4px', width:'100%', boxSizing:'border-box' }}>
               {navBtn('Home', VIEWS.HOME)}
               {navBtn('Map', VIEWS.MAP)}
               {navBtn('Study', VIEWS.STUDY)}
