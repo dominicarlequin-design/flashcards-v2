@@ -1,5 +1,14 @@
 import { ALL_CATEGORY, CATEGORY_EMOJI, getCat } from '../../constants/categories';
 
+// Scales a base font size down for longer text so it's more likely to fit without clipping.
+function scaledFontSize(text, base) {
+  const len = text?.length || 0;
+  if (len > 220) return base - 6;
+  if (len > 140) return base - 3;
+  if (len > 80) return base - 1;
+  return base;
+}
+
 export default function StudyView({
   isDesktop, isLarge, isXLarge,
   cameFromMap, backToMap,
@@ -65,14 +74,16 @@ export default function StudyView({
       </p>
 
       {/* Card */}
-      <div onClick={flipCard} style={{ perspective:'1000px', height: (currentCard?.explain ? (isXLarge ? 460 : isLarge ? 400 : isDesktop ? 340 : 300) : (isXLarge ? 420 : isLarge ? 360 : isDesktop ? 300 : 220)) + 'px', cursor:'pointer', marginBottom:'14px' }}>
+      <div onClick={flipCard} style={{ perspective:'1000px', cursor:'pointer', marginBottom:'14px' }}>
         <div style={{
-          width:'100%', height:'100%', position:'relative', transformStyle:'preserve-3d',
+          width:'100%', display:'grid', position:'relative', transformStyle:'preserve-3d',
           transition:'transform 0.5s cubic-bezier(0.23,1,0.32,1)',
           transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
         }}>
           <div style={{
-            position:'absolute', width:'100%', height:'100%', backfaceVisibility:'hidden',
+            gridArea:'1 / 1',
+            minHeight: (isXLarge ? 420 : isLarge ? 360 : isDesktop ? 300 : 220) + 'px',
+            width:'100%', backfaceVisibility:'hidden',
             borderRadius:'16px', background:`linear-gradient(145deg,${colors.bg},#0a0a0f)`,
             border:`1px solid ${colors.accent}22`, display:'flex', flexDirection:'column',
             alignItems:'center', justifyContent:'center', padding: isXLarge ? '48px' : isDesktop ? '36px' : '24px', boxSizing:'border-box',
@@ -81,12 +92,14 @@ export default function StudyView({
             <span style={{ fontSize:'11px', fontWeight:'600', letterSpacing:'1.5px', color:colors.accent, opacity:0.7, marginBottom:'14px', textTransform:'uppercase' }}>
               {CATEGORY_EMOJI[currentCard?.category]||'✨'} {currentCard?.category}
             </span>
-            <p style={{ fontSize: isXLarge ? '27px' : isDesktop ? '22px' : '19px', fontWeight:'500', textAlign:'center', margin:0, lineHeight:1.5, color:'#f1f5f9' }}>
+            <p style={{ fontSize: scaledFontSize(currentCard?.question, isXLarge ? 27 : isDesktop ? 22 : 19) + 'px', fontWeight:'500', textAlign:'center', margin:0, lineHeight:1.5, color:'#f1f5f9' }}>
               {currentCard?.question}
             </p>
           </div>
           <div style={{
-            position:'absolute', width:'100%', height:'100%', backfaceVisibility:'hidden',
+            gridArea:'1 / 1',
+            minHeight: (currentCard?.explain ? (isXLarge ? 460 : isLarge ? 400 : isDesktop ? 340 : 300) : (isXLarge ? 420 : isLarge ? 360 : isDesktop ? 300 : 220)) + 'px',
+            width:'100%', backfaceVisibility:'hidden',
             borderRadius:'16px', background:`linear-gradient(145deg,${colors.bg},#0a0a0f)`,
             border:`1.5px solid ${colors.accent}55`, display:'flex', flexDirection:'column',
             alignItems:'center', justifyContent: currentCard?.explain ? 'flex-start' : 'center', padding: isXLarge ? '48px' : isDesktop ? '36px' : '24px', boxSizing:'border-box',
@@ -109,13 +122,13 @@ export default function StudyView({
             {!currentCard?.explain && (
               <span style={{ fontSize:'11px', fontWeight:'600', letterSpacing:'1.5px', color:colors.accent, opacity:0.7, marginBottom:'14px', textTransform:'uppercase' }}>Answer</span>
             )}
-            <div style={{ flex:1, minHeight:0, overflowY:'auto', display:'flex', alignItems:'center', width:'100%' }}>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'center', width:'100%' }}>
               {answerTab === 'answer' || !currentCard?.explain ? (
-                <p style={{ fontSize: isXLarge ? '30px' : isDesktop ? '24px' : '21px', fontWeight:'600', textAlign:'center', margin:0, lineHeight:1.4, color:colors.accent, width:'100%' }}>
+                <p style={{ fontSize: scaledFontSize(currentCard?.answer, isXLarge ? 30 : isDesktop ? 24 : 21) + 'px', fontWeight:'600', textAlign:'center', margin:0, lineHeight:1.4, color:colors.accent, width:'100%' }}>
                   {currentCard?.answer}
                 </p>
               ) : (
-                <p style={{ fontSize: isXLarge ? '19px' : isDesktop ? '17px' : '15px', fontWeight:'500', textAlign:'center', margin:0, lineHeight:1.6, color:'#f1f5f9', width:'100%' }}>
+                <p style={{ fontSize: scaledFontSize(currentCard?.explain, isXLarge ? 19 : isDesktop ? 17 : 15) + 'px', fontWeight:'500', textAlign:'center', margin:0, lineHeight:1.6, color:'#f1f5f9', width:'100%' }}>
                   {currentCard?.explain}
                 </p>
               )}

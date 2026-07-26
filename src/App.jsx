@@ -94,7 +94,7 @@ export default function App() {
         setImportMsg(`\u2705 Imported ${newCards.length} new card${newCards.length !== 1 ? 's' : ''}!`);
         setTimeout(() => setImportMsg(''), 3000);
       } catch {
-        setImportMsg('\u274C Invalid file \u2014 make sure it\'s a flashcards JSON');
+        setImportMsg('❌ Invalid file — make sure it\'s a flashcards JSON');
         setTimeout(() => setImportMsg(''), 3000);
       }
     };
@@ -128,9 +128,6 @@ export default function App() {
 
   // reset index on category change
   useEffect(() => { setIndex(0); setFlipped(false); }, [activeCategory]);
-
-  // reset to the Answer tab whenever the card changes
-  useEffect(() => { setAnswerTab('answer'); }, [index, activeCategory]);
 
   // reset to the Answer tab whenever the card changes
   useEffect(() => { setAnswerTab('answer'); }, [index, activeCategory]);
@@ -226,8 +223,6 @@ export default function App() {
   // overall mastery across all cards (for Stats view)
   const overallMastery = cards.length ? Math.round((masteredIds.length / cards.length) * 100) : 0;
 
-  // \u2500\u2500 LEVEL / MAP LOGIC \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-  // \u2500\u2500 LEVEL / MAP LOGIC \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
   // ── LEVEL / MAP LOGIC ──────────────────────────────
   const isLevelComplete = (cat) => {
     const catCards = cards.filter(c => c.category === cat);
@@ -293,8 +288,6 @@ export default function App() {
         />
       )}
 
-      {/* \u2500\u2500 STUDY VIEW \u2500\u2500 */}
-      {/* \u2500\u2500 STUDY VIEW \u2500\u2500 */}
       {/* ── STUDY VIEW ── */}
       {view === VIEWS.STUDY && (
         <StudyView
@@ -329,8 +322,6 @@ export default function App() {
         />
       )}
 
-      {/* \u2500\u2500 STATS VIEW \u2500\u2500 */}
-      {/* \u2500\u2500 STATS VIEW \u2500\u2500 */}
       {/* ── STATS VIEW ── */}
       {view === VIEWS.STATS && (
         <StatsView
