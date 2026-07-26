@@ -1,4 +1,5 @@
 # Flashcards v2
+Learn Programmable language
 
 An AI-powered spaced repetition app. Turn a PDF into a full flashcard deck, then study using a Leitner box system with a gamified level map to track progress.
 

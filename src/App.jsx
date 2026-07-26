@@ -13,8 +13,19 @@ export default function App() {
   const isDesktop = useIsDesktop();
   const isLarge = useIsLarge();
   const isXLarge = useIsXLarge();
+  const isXLarge = useIsXLarge();
 
   const [cards, setCards] = useState(() => {
+    try {
+      const s = localStorage.getItem('fc_v5');
+      if (!s) return starterCards;
+      const saved = JSON.parse(s);
+      // always use the current starter card content (so app updates to built-in
+      // cards show up), and keep any truly user-added custom cards on top
+      const starterIds = new Set(starterCards.map(c => c.id));
+      const userAdded = saved.filter(c => !starterIds.has(c.id));
+      return [...starterCards, ...userAdded];
+    }
     try {
       const s = localStorage.getItem('fc_v5');
       if (!s) return starterCards;
@@ -32,7 +43,9 @@ export default function App() {
   const [results, setResults] = useState({});
 
   // permanent mastery \u2014 persists across sessions, drives level unlocking
+  // permanent mastery \u2014 persists across sessions, drives level unlocking
   const [masteredIds, setMasteredIds] = useState(() => {
+    try { const s = localStorage.getItem('fc_mastered_v2'); return s ? JSON.parse(s) : []; }
     try { const s = localStorage.getItem('fc_mastered_v2'); return s ? JSON.parse(s) : []; }
     catch { return []; }
   });
@@ -43,9 +56,11 @@ export default function App() {
   });
 
   const [view, setView] = useState(VIEWS.HOME);
+  const [view, setView] = useState(VIEWS.HOME);
   const [activeCategory, setActiveCategory] = useState(ALL_CATEGORY);
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
+  const [answerTab, setAnswerTab] = useState('answer');
   const [answerTab, setAnswerTab] = useState('answer');
   const [cameFromMap, setCameFromMap] = useState(false);
 
@@ -92,8 +107,10 @@ export default function App() {
           .filter(c => !existingQs.has(c.question.toLowerCase()));
         setCards(prev => [...prev, ...newCards]);
         setImportMsg(`\u2705 Imported ${newCards.length} new card${newCards.length !== 1 ? 's' : ''}!`);
+        setImportMsg(`\u2705 Imported ${newCards.length} new card${newCards.length !== 1 ? 's' : ''}!`);
         setTimeout(() => setImportMsg(''), 3000);
       } catch {
+        setImportMsg('\u274C Invalid file \u2014 make sure it\'s a flashcards JSON');
         setImportMsg('\u274C Invalid file \u2014 make sure it\'s a flashcards JSON');
         setTimeout(() => setImportMsg(''), 3000);
       }
@@ -109,8 +126,10 @@ export default function App() {
 
   // persist cards
   useEffect(() => { localStorage.setItem('fc_v5', JSON.stringify(cards)); }, [cards]);
+  useEffect(() => { localStorage.setItem('fc_v5', JSON.stringify(cards)); }, [cards]);
 
   // persist mastered ids
+  useEffect(() => { localStorage.setItem('fc_mastered_v2', JSON.stringify(masteredIds)); }, [masteredIds]);
   useEffect(() => { localStorage.setItem('fc_mastered_v2', JSON.stringify(masteredIds)); }, [masteredIds]);
 
   // streak logic
@@ -128,6 +147,9 @@ export default function App() {
 
   // reset index on category change
   useEffect(() => { setIndex(0); setFlipped(false); }, [activeCategory]);
+
+  // reset to the Answer tab whenever the card changes
+  useEffect(() => { setAnswerTab('answer'); }, [index, activeCategory]);
 
   // reset to the Answer tab whenever the card changes
   useEffect(() => { setAnswerTab('answer'); }, [index, activeCategory]);
@@ -213,6 +235,7 @@ export default function App() {
   const overallMastery = cards.length ? Math.round((masteredIds.length / cards.length) * 100) : 0;
 
   // \u2500\u2500 LEVEL / MAP LOGIC \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+  // \u2500\u2500 LEVEL / MAP LOGIC \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
   const isLevelComplete = (cat) => {
     const catCards = cards.filter(c => c.category === cat);
     if (!catCards.length) return false;
@@ -278,6 +301,7 @@ export default function App() {
       )}
 
       {/* \u2500\u2500 STUDY VIEW \u2500\u2500 */}
+      {/* \u2500\u2500 STUDY VIEW \u2500\u2500 */}
       {view === VIEWS.STUDY && (
         <StudyView
           isDesktop={isDesktop}
@@ -311,6 +335,7 @@ export default function App() {
         />
       )}
 
+      {/* \u2500\u2500 STATS VIEW \u2500\u2500 */}
       {/* \u2500\u2500 STATS VIEW \u2500\u2500 */}
       {view === VIEWS.STATS && (
         <StatsView
@@ -378,6 +403,7 @@ export default function App() {
           </div>
           {!isDesktop && (
             <div style={{ display:'flex', gap:'4px', background:'#111827', borderRadius:'10px', padding:'4px' }}>
+              {navBtn('Home', VIEWS.HOME)}
               {navBtn('Home', VIEWS.HOME)}
               {navBtn('Map', VIEWS.MAP)}
               {navBtn('Study', VIEWS.STUDY)}
