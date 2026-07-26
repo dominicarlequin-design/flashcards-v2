@@ -84,7 +84,12 @@ export default function ManageView({
 
       {editCard && (
         <div onClick={() => setEditCard(null)} style={{
-          position:'fixed', inset:0, background:'#000000aa', display:'flex', alignItems:'center', justifyContent:'center', padding:'20px', zIndex:10,
+          position:'fixed', inset:0, background:'#000000aa', display:'flex', alignItems:'center', justifyContent:'center', zIndex:10,
+          paddingTop: 'calc(20px + env(safe-area-inset-top))',
+          paddingBottom: 'calc(20px + env(safe-area-inset-bottom))',
+          paddingLeft: 'calc(20px + env(safe-area-inset-left))',
+          paddingRight: 'calc(20px + env(safe-area-inset-right))',
+          boxSizing:'border-box',
         }}>
           <div onClick={e => e.stopPropagation()} style={{ background:'#111827', borderRadius:'16px', padding:'20px', width:'100%', maxWidth:'420px' }}>
             <h3 style={{ margin:'0 0 14px', fontSize:'16px', color:'#e2e8f0' }}>Edit Card</h3>

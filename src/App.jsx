@@ -378,8 +378,19 @@ export default function App() {
   const contentMaxW = isXLarge ? 960 : isLarge ? 760 : 640;
   const containerMaxW = sidebarW + gapW + contentMaxW;
 
+  // base padding for the outer app wrapper, combined below with safe-area
+  // insets so content clears the notch, rounded corners, and home indicator
+  const basePadV = isXLarge ? 64 : isLarge ? 56 : isDesktop ? 40 : 20;
+  const basePadH = isXLarge ? 80 : isLarge ? 56 : isDesktop ? 40 : 16;
+
   return (
-    <div style={{ fontFamily:"'Segoe UI',system-ui,sans-serif", minHeight:'100vh', background:'#0a0a0f', color:'#e2e8f0', padding: isXLarge ? '64px 80px' : isLarge ? '56px' : isDesktop ? '40px' : '20px 16px', boxSizing:'border-box' }}>
+    <div style={{
+      fontFamily:"'Segoe UI',system-ui,sans-serif", minHeight:'100vh', background:'#0a0a0f', color:'#e2e8f0', boxSizing:'border-box',
+      paddingTop: `calc(${basePadV}px + env(safe-area-inset-top))`,
+      paddingBottom: `calc(${basePadV}px + env(safe-area-inset-bottom))`,
+      paddingLeft: `calc(${basePadH}px + env(safe-area-inset-left))`,
+      paddingRight: `calc(${basePadH}px + env(safe-area-inset-right))`,
+    }}>
       <div style={{ maxWidth: isDesktop ? `${containerMaxW}px` : '520px', margin:'0 auto' }}>
 
         {/* Header */}
