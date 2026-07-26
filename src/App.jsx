@@ -26,16 +26,6 @@ export default function App() {
       const userAdded = saved.filter(c => !starterIds.has(c.id));
       return [...starterCards, ...userAdded];
     }
-    try {
-      const s = localStorage.getItem('fc_v5');
-      if (!s) return starterCards;
-      const saved = JSON.parse(s);
-      // always use the current starter card content (so app updates to built-in
-      // cards show up), and keep any truly user-added custom cards on top
-      const starterIds = new Set(starterCards.map(c => c.id));
-      const userAdded = saved.filter(c => !starterIds.has(c.id));
-      return [...starterCards, ...userAdded];
-    }
     catch { return starterCards; }
   });
 
@@ -44,6 +34,7 @@ export default function App() {
 
   // permanent mastery \u2014 persists across sessions, drives level unlocking
   // permanent mastery \u2014 persists across sessions, drives level unlocking
+  // permanent mastery — persists across sessions, drives level unlocking
   const [masteredIds, setMasteredIds] = useState(() => {
     try { const s = localStorage.getItem('fc_mastered_v2'); return s ? JSON.parse(s) : []; }
     try { const s = localStorage.getItem('fc_mastered_v2'); return s ? JSON.parse(s) : []; }
@@ -112,6 +103,10 @@ export default function App() {
       } catch {
         setImportMsg('\u274C Invalid file \u2014 make sure it\'s a flashcards JSON');
         setImportMsg('\u274C Invalid file \u2014 make sure it\'s a flashcards JSON');
+        setImportMsg(`✅ Imported ${newCards.length} new card${newCards.length !== 1 ? 's' : ''}!`);
+        setTimeout(() => setImportMsg(''), 3000);
+      } catch {
+        setImportMsg('❌ Invalid file — make sure it\'s a flashcards JSON');
         setTimeout(() => setImportMsg(''), 3000);
       }
     };
@@ -204,6 +199,17 @@ export default function App() {
     setTimeout(() => setJustAdded(false), 2000);
   };
 
+  const addCardsBulk = (newCards) => {
+    if (!newCards || newCards.length === 0) return;
+    const withIds = newCards.map((c, i) => ({
+      id: Date.now() + i,
+      question: c.question,
+      answer: c.answer,
+      category: c.category || 'Custom',
+    }));
+    setCards(prev => [...prev, ...withIds]);
+  };
+
   const deleteCard = (id) => {
     setCards(prev => prev.filter(c => c.id !== id));
     setResults(prev => { const n = {...prev}; delete n[id]; return n; });
@@ -236,6 +242,7 @@ export default function App() {
 
   // \u2500\u2500 LEVEL / MAP LOGIC \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
   // \u2500\u2500 LEVEL / MAP LOGIC \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+  // ── LEVEL / MAP LOGIC ──────────────────────────────
   const isLevelComplete = (cat) => {
     const catCards = cards.filter(c => c.category === cat);
     if (!catCards.length) return false;
@@ -278,7 +285,7 @@ export default function App() {
 
   const content = (
     <>
-      {/* \u2500\u2500 HOME VIEW \u2500\u2500 */}
+      {/* ── HOME VIEW ── */}
       {view === VIEWS.HOME && (
         <HomeView
           isDesktop={isDesktop}
@@ -288,7 +295,7 @@ export default function App() {
         />
       )}
 
-      {/* \u2500\u2500 MAP VIEW \u2500\u2500 */}
+      {/* ── MAP VIEW ── */}
       {view === VIEWS.MAP && (
         <MapView
           isDesktop={isDesktop}
@@ -302,6 +309,7 @@ export default function App() {
 
       {/* \u2500\u2500 STUDY VIEW \u2500\u2500 */}
       {/* \u2500\u2500 STUDY VIEW \u2500\u2500 */}
+      {/* ── STUDY VIEW ── */}
       {view === VIEWS.STUDY && (
         <StudyView
           isDesktop={isDesktop}
@@ -337,6 +345,7 @@ export default function App() {
 
       {/* \u2500\u2500 STATS VIEW \u2500\u2500 */}
       {/* \u2500\u2500 STATS VIEW \u2500\u2500 */}
+      {/* ── STATS VIEW ── */}
       {view === VIEWS.STATS && (
         <StatsView
           isDesktop={isDesktop}
@@ -349,7 +358,7 @@ export default function App() {
         />
       )}
 
-      {/* \u2500\u2500 MANAGE VIEW \u2500\u2500 */}
+      {/* ── MANAGE VIEW ── */}
       {view === VIEWS.MANAGE && (
         <ManageView
           isDesktop={isDesktop}
@@ -368,6 +377,7 @@ export default function App() {
           newCat={newCat}
           setNewCat={setNewCat}
           addCard={addCard}
+          addCardsBulk={addCardsBulk}
           justAdded={justAdded}
           openEdit={openEdit}
           deleteCard={deleteCard}

@@ -3,7 +3,7 @@ Learn Programmable language
 
 An AI-powered spaced repetition app. Turn a PDF into a full flashcard deck, then study using a Leitner box system with a gamified level map to track progress.
 
-**Live app:** [flashcards-v2-ten.vercel.app](https://flashcards-v2-ten.vercel.app)
+**Live app:** [flashcards-v2-seven.vercel.app](https://flashcards-v2-seven.vercel.app)
 
 ## What it does
 
