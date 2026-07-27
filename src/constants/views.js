@@ -1,1 +1,1 @@
-export const VIEWS = { HOME: 'home', MAP: 'map', STUDY: 'study', STATS: 'stats', MANAGE: 'manage' };
+export const VIEWS = { HOME: 'home', MAP: 'map', STUDY: 'study', STATS: 'stats', MANAGE: 'manage', SETTINGS: 'settings' };

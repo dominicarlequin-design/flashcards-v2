@@ -1,20 +1,47 @@
-import BrainCanvas from '../BrainCanvas';
+import { INK, FONTS, RADII, SHADOWS } from '../../constants/theme';
 
-export default function HomeView({ isDesktop, isLarge, isXLarge, onStartStudying }) {
+export default function HomeView({ isDesktop, isXLarge, accent, cardsCount, masteredCount, streakCount, onStartStudying }) {
   return (
-    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', minHeight: isDesktop ? '60vh' : '50vh', padding: isDesktop ? '40px 20px' : '20px 10px' }}>
-      <div style={{ marginBottom:'20px' }}>
-        <BrainCanvas size={isXLarge ? 200 : isDesktop ? 168 : 130} />
+    <div style={{ textAlign: 'center', padding: '14px 0 8px' }}>
+      <div style={{
+        width: '110px', height: '110px', margin: '0 auto 26px', borderRadius: RADII.circle,
+        border: `1.5px solid ${accent}44`, background: INK.panel, display: 'flex',
+        alignItems: 'center', justifyContent: 'center', boxShadow: SHADOWS.heroSeal(accent),
+      }}>
+        <span style={{ fontFamily: FONTS.serif, fontSize: '46px', color: accent }}>⚖︎</span>
       </div>
-      <h2 style={{ fontSize: isXLarge ? '44px' : isLarge ? '38px' : isDesktop ? '32px' : '26px', fontWeight:'700', margin:'0 0 12px', letterSpacing:'-1px', color:'#f1f5f9' }}>Flashcards</h2>
-      <p style={{ fontSize: isDesktop ? '16px' : '14px', color:'#64748b', margin:'0 0 32px', maxWidth:'420px', lineHeight:1.5 }}>
-        Sharpen your knowledge, one card at a time.
+
+      <h2 style={{
+        fontFamily: FONTS.serif, fontSize: isXLarge ? '38px' : isDesktop ? '32px' : '28px', fontWeight: '600',
+        color: INK.cream, margin: '0 0 12px', letterSpacing: '-0.4px',
+      }}>Welcome back</h2>
+
+      <p style={{
+        fontSize: '15px', lineHeight: 1.6, color: '#a99a72', margin: '0 auto 30px', maxWidth: '360px',
+      }}>
+        Pick up where you left off. You've mastered {masteredCount} of {cardsCount} cards.
       </p>
-      <button onClick={onStartStudying} style={{
-        padding: isDesktop ? '16px 36px' : '14px 28px', borderRadius:'999px', border:'none', cursor:'pointer',
-        background:'#818cf8', color:'#0a0a0f', fontSize: isDesktop ? '16px' : '15px', fontWeight:'700',
-        boxShadow:'0 0 30px #818cf855',
-      }}>Start Studying →</button>
+
+      <button onClick={onStartStudying} className="fc-tap" style={{
+        fontFamily: FONTS.sans, padding: isDesktop ? '16px 40px' : '15px 40px', borderRadius: RADII.btn,
+        border: 'none', background: accent, color: '#14120b', fontSize: '14px', fontWeight: '700',
+        letterSpacing: '.5px', boxShadow: SHADOWS.goldButton(accent),
+      }}>Begin studying →</button>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '12px', marginTop: '38px' }}>
+        <div style={{ background: INK.panel, border: `1px solid ${INK.hairline}`, borderRadius: RADII.panel, padding: '18px 12px', textAlign: 'center' }}>
+          <p style={{ fontFamily: FONTS.serif, fontSize: '28px', fontWeight: '600', color: INK.cream, margin: 0 }}>{cardsCount}</p>
+          <p style={{ fontFamily: FONTS.sans, fontSize: '10px', letterSpacing: '1px', textTransform: 'uppercase', color: INK.dim, margin: '4px 0 0' }}>Cards</p>
+        </div>
+        <div style={{ background: INK.panel, border: `1px solid ${INK.hairline}`, borderRadius: RADII.panel, padding: '18px 12px', textAlign: 'center' }}>
+          <p style={{ fontFamily: FONTS.serif, fontSize: '28px', fontWeight: '600', color: accent, margin: 0 }}>{masteredCount}</p>
+          <p style={{ fontFamily: FONTS.sans, fontSize: '10px', letterSpacing: '1px', textTransform: 'uppercase', color: INK.dim, margin: '4px 0 0' }}>Mastered</p>
+        </div>
+        <div style={{ background: INK.panel, border: `1px solid ${INK.hairline}`, borderRadius: RADII.panel, padding: '18px 12px', textAlign: 'center' }}>
+          <p style={{ fontFamily: FONTS.serif, fontSize: '28px', fontWeight: '600', color: INK.streakAmber, margin: 0 }}>{streakCount}</p>
+          <p style={{ fontFamily: FONTS.sans, fontSize: '10px', letterSpacing: '1px', textTransform: 'uppercase', color: INK.dim, margin: '4px 0 0' }}>Streak</p>
+        </div>
+      </div>
     </div>
   );
 }

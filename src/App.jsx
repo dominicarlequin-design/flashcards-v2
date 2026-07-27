@@ -1,13 +1,27 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useIsDesktop, useIsLarge, useIsXLarge } from './hooks/useBreakpoints';
 import HomeView from './components/views/HomeView';
 import MapView from './components/views/MapView';
 import StudyView from './components/views/StudyView';
 import StatsView from './components/views/StatsView';
 import ManageView from './components/views/ManageView';
+import OnboardingView from './components/views/OnboardingView';
+import SettingsView from './components/views/SettingsView';
+import MotifBackground from './components/MotifBackground';
 import starterCards from './data/startercards';
 import { ALL_CATEGORY, LEVEL_ORDER, CATEGORY_LIST, getCat } from './constants/categories';
+import { INK, FONTS, PAGE_BG } from './constants/theme';
 import { VIEWS } from './constants/views';
+
+const ACCENT = INK.gold;
+
+const DEFAULT_SETTINGS = {
+  shuffle: false,
+  reduceMotion: false,
+  dailyReminder: true,
+  bgMotif: 'law',
+  bgDensity: 'normal',
+};
 
 export default function App() {
   const isDesktop = useIsDesktop();
@@ -44,6 +58,21 @@ export default function App() {
     try { return JSON.parse(localStorage.getItem('fc_streak') || '{"count":0,"lastDate":""}'); }
     catch { return { count: 0, lastDate: '' }; }
   });
+
+  // first-run intro — shown once, then remembered
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    try { return localStorage.getItem('fc_onboarded_v1') !== '1'; } catch { return true; }
+  });
+
+  // shuffle / reduce motion / background motif / daily reminder toggle
+  const [settings, setSettings] = useState(() => {
+    try {
+      const s = localStorage.getItem('fc_settings_v1');
+      return s ? { ...DEFAULT_SETTINGS, ...JSON.parse(s) } : DEFAULT_SETTINGS;
+    } catch { return DEFAULT_SETTINGS; }
+  });
+  const [shuffleSeed, setShuffleSeed] = useState(0);
+  const [justReset, setJustReset] = useState(false);
 
   const [view, setView] = useState(VIEWS.HOME);
   const [activeCategory, setActiveCategory] = useState(ALL_CATEGORY);
@@ -94,7 +123,7 @@ export default function App() {
           .map(c => ({ ...c, id: c.id || Date.now() + Math.random() }))
           .filter(c => !existingQs.has(c.question.toLowerCase()));
         setCards(prev => [...prev, ...newCards]);
-        setImportMsg(`\u2705 Imported ${newCards.length} new card${newCards.length !== 1 ? 's' : ''}!`);
+        setImportMsg(`✅ Imported ${newCards.length} new card${newCards.length !== 1 ? 's' : ''}!`);
         setTimeout(() => setImportMsg(''), 3000);
       } catch {
         setImportMsg('❌ Invalid file — make sure it\'s a flashcards JSON');
@@ -106,7 +135,22 @@ export default function App() {
   };
 
   const categories = [ALL_CATEGORY, ...Array.from(new Set(cards.map(c => c.category)))];
-  const filtered = activeCategory === ALL_CATEGORY ? cards : cards.filter(c => c.category === activeCategory);
+
+  // filtered card order for the current category — shuffled (with a stable
+  // seed, so it doesn't reorder on unrelated re-renders) when that setting is on
+  const filtered = useMemo(() => {
+    const base = activeCategory === ALL_CATEGORY ? cards : cards.filter(c => c.category === activeCategory);
+    if (!settings.shuffle) return base;
+    const arr = [...base];
+    let seed = shuffleSeed || 1;
+    const rand = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; };
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(rand() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }, [cards, activeCategory, settings.shuffle, shuffleSeed]);
+
   const currentCard = filtered[index] || filtered[0];
   const colors = currentCard ? getCat(currentCard.category) : getCat('Custom');
 
@@ -115,6 +159,9 @@ export default function App() {
 
   // persist mastered ids
   useEffect(() => { localStorage.setItem('fc_mastered_v2', JSON.stringify(masteredIds)); }, [masteredIds]);
+
+  // persist settings
+  useEffect(() => { localStorage.setItem('fc_settings_v1', JSON.stringify(settings)); }, [settings]);
 
   // streak logic
   useEffect(() => {
@@ -129,8 +176,8 @@ export default function App() {
     localStorage.setItem('fc_streak', JSON.stringify(newStreak));
   }, []);
 
-  // reset index on category change
-  useEffect(() => { setIndex(0); setFlipped(false); }, [activeCategory]);
+  // reset index on category change (and deal a fresh shuffle order)
+  useEffect(() => { setIndex(0); setFlipped(false); setShuffleSeed(s => s + 1); }, [activeCategory]);
 
   // reset to the Answer tab whenever the card changes
   useEffect(() => { setAnswerTab('answer'); }, [index, activeCategory]);
@@ -166,7 +213,17 @@ export default function App() {
     nextCard();
   };
 
-  const resetSession = () => { setResults({}); setIndex(0); setFlipped(false); };
+  const resetSession = () => { setResults({}); setIndex(0); setFlipped(false); setShuffleSeed(s => s + 1); };
+
+  // full progress reset (Settings) — clears mastery on top of the session
+  const resetProgress = () => {
+    setMasteredIds([]);
+    setResults({});
+    setIndex(0);
+    setFlipped(false);
+    setJustReset(true);
+    setTimeout(() => setJustReset(false), 1600);
+  };
 
   // session stats
   const sessionCards = filtered.filter(c => results[c.id]);
@@ -257,18 +314,34 @@ export default function App() {
     setView(VIEWS.MAP);
   };
 
+  // settings handlers
+  const toggleSetting = (key) => {
+    setSettings(s => ({ ...s, [key]: !s[key] }));
+    if (key === 'shuffle') setShuffleSeed(x => x + 1);
+  };
+  const setBgMotif = (bgMotif) => setSettings(s => ({ ...s, bgMotif }));
+  const setBgDensity = (bgDensity) => setSettings(s => ({ ...s, bgDensity }));
+
+  const completeOnboarding = () => {
+    setShowOnboarding(false);
+    try { localStorage.setItem('fc_onboarded_v1', '1'); } catch { /* best-effort persistence */ }
+  };
+
   const navBtn = (label, v) => (
-    <button onClick={() => setView(v)} style={{
-      padding: isDesktop ? '11px 16px' : '8px 14px',
+    <button key={v} onClick={() => setView(v)} className="fc-tap" style={{
+      flex: isDesktop ? 'none' : '1',
+      fontFamily: FONTS.sans,
+      padding: isDesktop ? '11px 16px' : '9px 6px',
       borderRadius: isDesktop ? '10px' : '8px',
       border: 'none', cursor: 'pointer',
-      background: view === v ? '#1e2538' : 'transparent',
-      color: view === v ? '#e2e8f0' : '#475569',
-      fontSize: isDesktop ? '14px' : '13px',
-      fontWeight: view === v ? '600' : '400',
+      background: view === v ? ACCENT : 'transparent',
+      color: view === v ? '#14120b' : INK.mutedGoldGrey,
+      fontSize: isDesktop ? '14px' : '11px',
+      fontWeight: view === v ? '700' : '400',
+      letterSpacing: isDesktop ? 'normal' : '1px',
+      textTransform: isDesktop ? 'none' : 'uppercase',
       textAlign: isDesktop ? 'left' : 'center',
       width: isDesktop ? '100%' : 'auto',
-      flex: isDesktop ? 'none' : '1',
     }}>{label}</button>
   );
 
@@ -280,6 +353,10 @@ export default function App() {
           isDesktop={isDesktop}
           isLarge={isLarge}
           isXLarge={isXLarge}
+          accent={ACCENT}
+          cardsCount={cards.length}
+          masteredCount={activeMasteredIds.length}
+          streakCount={streak.count}
           onStartStudying={() => setView(VIEWS.STUDY)}
         />
       )}
@@ -290,6 +367,8 @@ export default function App() {
           isDesktop={isDesktop}
           isLarge={isLarge}
           isXLarge={isXLarge}
+          cards={cards}
+          masteredIds={masteredIds}
           isLevelUnlocked={isLevelUnlocked}
           isLevelComplete={isLevelComplete}
           enterLevel={enterLevel}
@@ -302,6 +381,7 @@ export default function App() {
           isDesktop={isDesktop}
           isLarge={isLarge}
           isXLarge={isXLarge}
+          accent={ACCENT}
           cameFromMap={cameFromMap}
           backToMap={backToMap}
           categories={categories}
@@ -322,6 +402,8 @@ export default function App() {
           colors={colors}
           flipCard={flipCard}
           flipped={flipped}
+          reduceMotion={settings.reduceMotion}
+          questionSerif={true}
           answerTab={answerTab}
           setAnswerTab={setAnswerTab}
           markCard={markCard}
@@ -336,6 +418,7 @@ export default function App() {
           isDesktop={isDesktop}
           isLarge={isLarge}
           isXLarge={isXLarge}
+          accent={ACCENT}
           cards={cards}
           masteredIds={activeMasteredIds}
           streak={streak}
@@ -349,6 +432,7 @@ export default function App() {
           isDesktop={isDesktop}
           isLarge={isLarge}
           isXLarge={isXLarge}
+          accent={ACCENT}
           cards={cards}
           showForm={showForm}
           setShowForm={setShowForm}
@@ -377,6 +461,21 @@ export default function App() {
           saveEdit={saveEdit}
         />
       )}
+
+      {/* ── SETTINGS VIEW ── */}
+      {view === VIEWS.SETTINGS && (
+        <SettingsView
+          isDesktop={isDesktop}
+          isLarge={isLarge}
+          isXLarge={isXLarge}
+          settings={settings}
+          onToggle={toggleSetting}
+          onMotifChange={setBgMotif}
+          onDensityChange={setBgDensity}
+          resetProgress={resetProgress}
+          justReset={justReset}
+        />
+      )}
     </>
   );
 
@@ -393,50 +492,65 @@ export default function App() {
 
   return (
     <div style={{
-      fontFamily:"'Segoe UI',system-ui,sans-serif", minHeight:'100vh', background:'#0a0a0f', color:'#e2e8f0', boxSizing:'border-box',
+      position: 'relative', fontFamily: FONTS.sans, minHeight: '100vh', background: PAGE_BG, color: INK.cream, boxSizing: 'border-box',
       paddingTop: `calc(${basePadV}px + env(safe-area-inset-top))`,
       paddingBottom: `calc(${basePadV}px + env(safe-area-inset-bottom))`,
       paddingLeft: `calc(${basePadH}px + env(safe-area-inset-left))`,
       paddingRight: `calc(${basePadH}px + env(safe-area-inset-right))`,
     }}>
-      <div style={{ maxWidth: isDesktop ? `${containerMaxW}px` : '520px', margin:'0 auto' }}>
+      <MotifBackground motif={settings.bgMotif} density={settings.bgDensity} reduceMotion={settings.reduceMotion} />
 
-        {/* Header */}
-        <div style={{
-          display:'flex', flexDirection: isDesktop ? 'row' : 'column',
-          alignItems: isDesktop ? 'center' : 'stretch', justifyContent:'space-between',
-          gap: isDesktop ? '0' : '12px',
-          marginBottom: isLarge ? '40px' : isDesktop ? '32px' : '20px',
-        }}>
-          <div>
-            <h1 style={{ fontSize: isXLarge ? '38px' : isLarge ? '32px' : isDesktop ? '26px' : '20px', fontWeight:'700', margin:0, letterSpacing:'-0.5px' }}>Flashcards</h1>
-            <p style={{ color:'#334155', fontSize: isXLarge ? '15px' : isLarge ? '14px' : isDesktop ? '13px' : '12px', margin:0 }}>{cards.length} cards · 🔥 {streak.count} day streak</p>
-          </div>
-          {!isDesktop && (
-            <div style={{ display:'flex', gap:'4px', background:'#111827', borderRadius:'10px', padding:'4px', width:'100%', boxSizing:'border-box' }}>
-              {navBtn('Home', VIEWS.HOME)}
-              {navBtn('Map', VIEWS.MAP)}
-              {navBtn('Study', VIEWS.STUDY)}
-              {navBtn('Stats', VIEWS.STATS)}
-              {navBtn('Cards', VIEWS.MANAGE)}
-            </div>
-          )}
-        </div>
+      <div style={{ position: 'relative', zIndex: 1, maxWidth: isDesktop ? `${containerMaxW}px` : '520px', margin: '0 auto' }}>
 
-        <div style={{ display:'flex', gap: isXLarge ? '56px' : isLarge ? '44px' : isDesktop ? '32px' : '0', alignItems:'flex-start' }}>
-          {isDesktop && view !== VIEWS.HOME && (
-            <div style={{ display:'flex', flexDirection:'column', gap: isLarge ? '6px' : '4px', background:'#111827', borderRadius:'14px', padding: isXLarge ? '18px' : isLarge ? '14px' : '10px', width: isXLarge ? '232px' : isLarge ? '200px' : '168px', flexShrink:0, position:'sticky', top: isLarge ? '56px' : '40px' }}>
-              {navBtn('Home', VIEWS.HOME)}
-              {navBtn('Map', VIEWS.MAP)}
-              {navBtn('Study', VIEWS.STUDY)}
-              {navBtn('Stats', VIEWS.STATS)}
-              {navBtn('Cards', VIEWS.MANAGE)}
+        {showOnboarding ? (
+          <OnboardingView accent={ACCENT} onComplete={completeOnboarding} />
+        ) : (
+          <>
+            {/* Header */}
+            <div style={{
+              display:'flex', flexDirection: isDesktop ? 'row' : 'column',
+              alignItems: isDesktop ? 'center' : 'stretch',
+              gap: isDesktop ? '0' : '12px',
+              marginBottom: isLarge ? '40px' : isDesktop ? '32px' : '20px',
+            }}>
+              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', width:'100%', gap:'12px' }}>
+                <div>
+                  <h1 style={{ fontFamily: FONTS.serif, fontSize: isXLarge ? '32px' : isLarge ? '28px' : isDesktop ? '24px' : '20px', fontWeight:'600', margin:0, letterSpacing:'-0.3px' }}>Flashcards</h1>
+                  <p style={{ fontFamily: FONTS.sans, fontSize: isDesktop ? '10.5px' : '10px', letterSpacing:'1.5px', textTransform:'uppercase', color: INK.mutedGoldGrey, margin:'3px 0 0' }}>{cards.length} cards · {streak.count} day streak</p>
+                </div>
+                <button onClick={() => setView(VIEWS.SETTINGS)} className="fc-tap" style={{
+                  flexShrink: 0, width:'40px', height:'40px', borderRadius:'50%', border: `1px solid ${INK.hairlineStrong}`,
+                  background:'transparent', color: INK.mutedGoldGrey, fontSize:'17px', cursor:'pointer',
+                  display:'flex', alignItems:'center', justifyContent:'center',
+                }}>⚙</button>
+              </div>
+              {!isDesktop && (
+                <div className="scrollx" style={{ display:'flex', gap:'4px', background: INK.panel, border: `1px solid ${INK.hairline}`, borderRadius:'12px', padding:'5px', width:'100%', boxSizing:'border-box', overflowX: 'auto' }}>
+                  {navBtn('Home', VIEWS.HOME)}
+                  {navBtn('Map', VIEWS.MAP)}
+                  {navBtn('Study', VIEWS.STUDY)}
+                  {navBtn('Stats', VIEWS.STATS)}
+                  {navBtn('Cards', VIEWS.MANAGE)}
+                </div>
+              )}
             </div>
-          )}
-          <div style={{ flex:1, minWidth:0 }}>
-            {content}
-          </div>
-        </div>
+
+            <div style={{ display:'flex', gap: isXLarge ? '56px' : isLarge ? '44px' : isDesktop ? '32px' : '0', alignItems:'flex-start' }}>
+              {isDesktop && view !== VIEWS.HOME && (
+                <div style={{ display:'flex', flexDirection:'column', gap: isLarge ? '6px' : '4px', background: INK.panel, border: `1px solid ${INK.hairline}`, borderRadius:'14px', padding: isXLarge ? '18px' : isLarge ? '14px' : '10px', width: isXLarge ? '232px' : isLarge ? '200px' : '168px', flexShrink:0, position:'sticky', top: isLarge ? '56px' : '40px' }}>
+                  {navBtn('Home', VIEWS.HOME)}
+                  {navBtn('Map', VIEWS.MAP)}
+                  {navBtn('Study', VIEWS.STUDY)}
+                  {navBtn('Stats', VIEWS.STATS)}
+                  {navBtn('Cards', VIEWS.MANAGE)}
+                </div>
+              )}
+              <div style={{ flex:1, minWidth:0 }}>
+                {content}
+              </div>
+            </div>
+          </>
+        )}
 
       </div>
     </div>

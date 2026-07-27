@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { extractPdfText, chunkPages } from '../../utils/extractPdfText';
 import { CATEGORY_LIST } from '../../constants/categories';
+import { INK, FONTS, RADII } from '../../constants/theme';
 
 const inputStyle = {
-  width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: '8px',
-  border: '1px solid #1e2538', background: '#0a0a0f', color: '#e2e8f0', fontSize: '14px',
-  fontFamily: 'inherit', marginBottom: '10px',
+  width: '100%', boxSizing: 'border-box', padding: '11px 13px', borderRadius: RADII.pill,
+  border: `1px solid ${INK.hairline}`, background: INK.inputBg, color: INK.cream, fontSize: '14px',
+  fontFamily: FONTS.sans, marginBottom: '10px',
 };
 
 const STAGES = {
@@ -16,7 +17,7 @@ const STAGES = {
   ERROR: 'error',
 };
 
-export default function PdfImportPanel({ addCardsBulk, onClose }) {
+export default function PdfImportPanel({ addCardsBulk, onClose, accent }) {
   const [stage, setStage] = useState(STAGES.IDLE);
   const [category, setCategory] = useState('Custom');
   const [progress, setProgress] = useState({ done: 0, total: 0 });
@@ -78,64 +79,64 @@ export default function PdfImportPanel({ addCardsBulk, onClose }) {
   const includedCount = generated.filter(c => c.included).length;
 
   return (
-    <div style={{ background: '#111827', borderRadius: '14px', padding: '16px', marginBottom: '20px' }}>
-      <h3 style={{ margin: '0 0 12px', fontSize: '15px', color: '#e2e8f0' }}>📄 Generate cards from PDF</h3>
+    <div style={{ background: INK.panel, border: `1px solid ${INK.hairline}`, borderRadius: RADII.panel, padding: '16px', marginBottom: '20px' }}>
+      <h3 style={{ fontFamily: FONTS.serif, margin: '0 0 12px', fontSize: '16px', color: INK.cream }}>Generate cards from PDF</h3>
 
       {(stage === STAGES.IDLE || stage === STAGES.ERROR) && (
         <>
           <select value={category} onChange={e => setCategory(e.target.value)} style={inputStyle}>
             {[...CATEGORY_LIST, 'Custom'].map(c => <option key={c} value={c}>{c}</option>)}
           </select>
-          <label style={{
-            display: 'inline-block', padding: '10px 16px', borderRadius: '10px',
-            border: '1px solid #1e2538', background: 'transparent', color: '#94a3b8',
+          <label className="fc-tap" style={{
+            display: 'inline-block', fontFamily: FONTS.sans, padding: '10px 16px', borderRadius: RADII.nav,
+            border: `1px solid ${INK.hairline}`, background: 'transparent', color: INK.mutedGoldGrey,
             fontSize: '13px', cursor: 'pointer',
           }}>
             Choose PDF
             <input type="file" accept="application/pdf" onChange={handleFile} style={{ display: 'none' }} />
           </label>
-          {errorMsg && <p style={{ color: '#f87171', fontSize: '13px', marginTop: '10px' }}>{errorMsg}</p>}
+          {errorMsg && <p style={{ color: INK.reviewText, fontSize: '13px', marginTop: '10px' }}>{errorMsg}</p>}
         </>
       )}
 
       {stage === STAGES.EXTRACTING && (
-        <p style={{ color: '#94a3b8', fontSize: '13px' }}>Reading PDF…</p>
+        <p style={{ color: INK.mutedGoldGrey, fontSize: '13px' }}>Reading PDF…</p>
       )}
 
       {stage === STAGES.GENERATING && (
-        <p style={{ color: '#94a3b8', fontSize: '13px' }}>
+        <p style={{ color: INK.mutedGoldGrey, fontSize: '13px' }}>
           Generating cards… chunk {progress.done}/{progress.total}
         </p>
       )}
 
       {stage === STAGES.REVIEW && (
         <>
-          <p style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '10px' }}>
+          <p style={{ color: INK.mutedGoldGrey, fontSize: '13px', marginBottom: '10px' }}>
             {generated.length} cards generated — {includedCount} selected. Uncheck any you don't want.
           </p>
           <div style={{ maxHeight: '340px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '14px' }}>
             {generated.map((c, i) => (
-              <label key={i} style={{
-                display: 'flex', gap: '10px', alignItems: 'flex-start', background: '#0a0a0f',
-                borderRadius: '10px', padding: '10px 12px', cursor: 'pointer',
+              <label key={i} className="fc-tap" style={{
+                display: 'flex', gap: '10px', alignItems: 'flex-start', background: INK.inputBg,
+                borderRadius: RADII.nav, padding: '10px 12px', cursor: 'pointer',
                 opacity: c.included ? 1 : 0.45,
               }}>
                 <input type="checkbox" checked={c.included} onChange={() => toggleCard(i)} style={{ marginTop: '3px' }} />
                 <div>
-                  <p style={{ margin: '0 0 4px', fontSize: '13px', color: '#f1f5f9', fontWeight: '500' }}>{c.question}</p>
-                  <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>{c.answer}</p>
+                  <p style={{ margin: '0 0 4px', fontSize: '13px', color: INK.cream, fontWeight: '500' }}>{c.question}</p>
+                  <p style={{ margin: 0, fontSize: '12px', color: INK.mutedGoldGrey }}>{c.answer}</p>
                 </div>
               </label>
             ))}
           </div>
           <div style={{ display: 'flex', gap: '10px' }}>
-            <button onClick={() => { setStage(STAGES.IDLE); setGenerated([]); }} style={{
-              flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid #1e2538',
-              background: 'transparent', color: '#94a3b8', fontSize: '13px', cursor: 'pointer',
+            <button onClick={() => { setStage(STAGES.IDLE); setGenerated([]); }} className="fc-tap" style={{
+              flex: 1, fontFamily: FONTS.sans, padding: '10px', borderRadius: RADII.pill, border: `1px solid ${INK.hairline}`,
+              background: 'transparent', color: INK.mutedGoldGrey, fontSize: '13px',
             }}>Cancel</button>
-            <button onClick={confirmAdd} disabled={includedCount === 0} style={{
-              flex: 1, padding: '10px', borderRadius: '8px', border: 'none',
-              background: includedCount === 0 ? '#818cf855' : '#818cf8', color: '#0a0a0f',
+            <button onClick={confirmAdd} disabled={includedCount === 0} className="fc-tap" style={{
+              flex: 1, fontFamily: FONTS.sans, padding: '10px', borderRadius: RADII.pill, border: 'none',
+              background: includedCount === 0 ? `${accent}55` : accent, color: '#14120b',
               fontSize: '13px', fontWeight: '700', cursor: includedCount === 0 ? 'default' : 'pointer',
             }}>Add {includedCount} card{includedCount === 1 ? '' : 's'}</button>
           </div>

@@ -1,49 +1,50 @@
 import { CATEGORY_LIST, CATEGORY_EMOJI, getCat } from '../../constants/categories';
+import { INK, FONTS, RADII } from '../../constants/theme';
 
-export default function StatsView({ isDesktop, isLarge, isXLarge, cards, masteredIds, streak, overallMastery }) {
+export default function StatsView({ isDesktop, isLarge, isXLarge, accent, cards, masteredIds, streak, overallMastery }) {
   return (
     <div style={{ maxWidth: isXLarge ? '960px' : isLarge ? '760px' : isDesktop ? '640px' : 'none', margin: isDesktop ? '0 auto' : '0' }}>
-      <div style={{
-        display:'grid', gridTemplateColumns: isDesktop ? 'repeat(3,1fr)' : 'repeat(2,1fr)', gap:'12px', marginBottom:'20px',
-      }}>
-        <div style={{ background:'#111827', borderRadius:'14px', padding:'18px', textAlign:'center' }}>
-          <p style={{ margin:0, fontSize:'26px', fontWeight:'700', color:'#e2e8f0' }}>{cards.length}</p>
-          <p style={{ margin:0, fontSize:'12px', color:'#64748b' }}>Total Cards</p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '12px', marginBottom: '18px' }}>
+        <div style={{ background: INK.panel, border: `1px solid ${INK.hairline}`, borderRadius: RADII.panel, padding: '20px 12px', textAlign: 'center' }}>
+          <p style={{ fontFamily: FONTS.serif, fontSize: '30px', fontWeight: '600', color: INK.cream, margin: 0 }}>{cards.length}</p>
+          <p style={{ fontFamily: FONTS.sans, fontSize: '10px', letterSpacing: '1px', textTransform: 'uppercase', color: INK.dim, margin: '5px 0 0' }}>Total</p>
         </div>
-        <div style={{ background:'#111827', borderRadius:'14px', padding:'18px', textAlign:'center' }}>
-          <p style={{ margin:0, fontSize:'26px', fontWeight:'700', color:'#4ade80' }}>{masteredIds.length}</p>
-          <p style={{ margin:0, fontSize:'12px', color:'#64748b' }}>Mastered</p>
+        <div style={{ background: INK.panel, border: `1px solid ${INK.hairline}`, borderRadius: RADII.panel, padding: '20px 12px', textAlign: 'center' }}>
+          <p style={{ fontFamily: FONTS.serif, fontSize: '30px', fontWeight: '600', color: accent, margin: 0 }}>{masteredIds.length}</p>
+          <p style={{ fontFamily: FONTS.sans, fontSize: '10px', letterSpacing: '1px', textTransform: 'uppercase', color: INK.dim, margin: '5px 0 0' }}>Mastered</p>
         </div>
-        <div style={{ background:'#111827', borderRadius:'14px', padding:'18px', textAlign:'center', gridColumn: isDesktop ? 'auto' : 'span 2' }}>
-          <p style={{ margin:0, fontSize:'26px', fontWeight:'700', color:'#fbbf24' }}>🔥 {streak.count}</p>
-          <p style={{ margin:0, fontSize:'12px', color:'#64748b' }}>Day Streak</p>
+        <div style={{ background: INK.panel, border: `1px solid ${INK.hairline}`, borderRadius: RADII.panel, padding: '20px 12px', textAlign: 'center' }}>
+          <p style={{ fontFamily: FONTS.serif, fontSize: '30px', fontWeight: '600', color: INK.streakAmber, margin: 0 }}>🔥 {streak.count}</p>
+          <p style={{ fontFamily: FONTS.sans, fontSize: '10px', letterSpacing: '1px', textTransform: 'uppercase', color: INK.dim, margin: '5px 0 0' }}>Streak</p>
         </div>
       </div>
 
-      <div style={{ background:'#111827', borderRadius:'14px', padding:'18px', marginBottom:'20px' }}>
-        <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'8px' }}>
-          <span style={{ fontSize:'13px', color:'#94a3b8', fontWeight:'600' }}>Overall Mastery</span>
-          <span style={{ fontSize:'13px', color:'#4ade80', fontWeight:'700' }}>{overallMastery}%</span>
+      <div style={{ background: INK.panel, border: `1px solid ${INK.hairline}`, borderRadius: RADII.panel, padding: '20px', marginBottom: '18px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '12px' }}>
+          <span style={{ fontFamily: FONTS.sans, fontSize: '11px', letterSpacing: '2px', textTransform: 'uppercase', color: INK.mutedGoldGrey }}>Overall mastery</span>
+          <span style={{ fontFamily: FONTS.serif, fontSize: '20px', fontWeight: '600', color: accent }}>{overallMastery}%</span>
         </div>
-        <div style={{ height:'8px', background:'#1e2538', borderRadius:'999px', overflow:'hidden' }}>
-          <div style={{ width:`${overallMastery}%`, height:'100%', background:'#4ade80', borderRadius:'999px', transition:'width 0.3s' }} />
+        <div style={{ height: '8px', background: INK.hairline, borderRadius: '999px', overflow: 'hidden' }}>
+          <div style={{ width: `${overallMastery}%`, height: '100%', background: `linear-gradient(90deg,${accent},${INK.goldHover})`, borderRadius: '999px', transition: 'width 0.4s' }} />
         </div>
       </div>
 
-      <div style={{ display:'grid', gridTemplateColumns: isDesktop ? 'repeat(2,1fr)' : '1fr', gap:'10px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isDesktop ? 'repeat(2,1fr)' : '1fr', gap: '10px' }}>
         {CATEGORY_LIST.filter(cat => cards.some(c => c.category === cat)).map(cat => {
           const cc = getCat(cat);
           const catCards = cards.filter(c => c.category === cat);
           const catMastered = catCards.filter(c => masteredIds.includes(c.id)).length;
           const m = catCards.length ? Math.round((catMastered / catCards.length) * 100) : 0;
           return (
-            <div key={cat} style={{ background:'#111827', borderRadius:'12px', padding:'14px 16px' }}>
-              <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'6px' }}>
-                <span style={{ fontSize:'13px', color:cc.accent, fontWeight:'600' }}>{CATEGORY_EMOJI[cat]} {cat}</span>
-                <span style={{ fontSize:'12px', color:'#64748b' }}>{catMastered}/{catCards.length}</span>
+            <div key={cat} style={{ background: INK.panel, border: `1px solid ${INK.hairline}`, borderRadius: RADII.nav, padding: '15px 17px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span style={{ fontFamily: FONTS.sans, fontSize: '12px', letterSpacing: '1px', textTransform: 'uppercase', fontWeight: '600', color: cc.accent }}>
+                  {CATEGORY_EMOJI[cat] || '✦'} {cat}
+                </span>
+                <span style={{ fontFamily: FONTS.sans, fontSize: '11px', color: INK.dim }}>{catMastered}/{catCards.length}</span>
               </div>
-              <div style={{ height:'6px', background:'#1e2538', borderRadius:'999px', overflow:'hidden' }}>
-                <div style={{ width:`${m}%`, height:'100%', background:cc.accent, borderRadius:'999px' }} />
+              <div style={{ height: '6px', background: INK.hairline, borderRadius: '999px', overflow: 'hidden' }}>
+                <div style={{ width: `${m}%`, height: '100%', background: cc.accent, borderRadius: '999px' }} />
               </div>
             </div>
           );
