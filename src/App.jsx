@@ -6,7 +6,7 @@ import StudyView from './components/views/StudyView';
 import StatsView from './components/views/StatsView';
 import ManageView from './components/views/ManageView';
 import starterCards from './data/startercards';
-import { ALL_CATEGORY, LEVEL_ORDER, getCat } from './constants/categories';
+import { ALL_CATEGORY, LEVEL_ORDER, CATEGORY_LIST, getCat } from './constants/categories';
 import { VIEWS } from './constants/views';
 
 export default function App() {
@@ -20,9 +20,12 @@ export default function App() {
       if (!s) return starterCards;
       const saved = JSON.parse(s);
       // always use the current starter card content (so app updates to built-in
-      // cards show up), and keep any truly user-added custom cards on top
+      // cards show up), and keep any truly user-added custom cards on top —
+      // dropping anything left over from a removed category (e.g. old starter
+      // cards from a subject that's no longer offered)
       const starterIds = new Set(starterCards.map(c => c.id));
-      const userAdded = saved.filter(c => !starterIds.has(c.id));
+      const validCategories = new Set([...CATEGORY_LIST, 'Custom']);
+      const userAdded = saved.filter(c => !starterIds.has(c.id) && validCategories.has(c.category));
       return [...starterCards, ...userAdded];
     }
     catch { return starterCards; }
@@ -220,8 +223,12 @@ export default function App() {
     return Math.round((k / catCards.length) * 100);
   };
 
-  // overall mastery across all cards (for Stats view)
-  const overallMastery = cards.length ? Math.round((masteredIds.length / cards.length) * 100) : 0;
+  // overall mastery across all cards (for Stats view) — filter out mastered
+  // ids left over from cards that no longer exist (e.g. a removed category),
+  // so stale progress data doesn't inflate the percentage
+  const currentCardIds = new Set(cards.map(c => c.id));
+  const activeMasteredIds = masteredIds.filter(id => currentCardIds.has(id));
+  const overallMastery = cards.length ? Math.round((activeMasteredIds.length / cards.length) * 100) : 0;
 
   // ── LEVEL / MAP LOGIC ──────────────────────────────
   const isLevelComplete = (cat) => {
@@ -330,7 +337,7 @@ export default function App() {
           isLarge={isLarge}
           isXLarge={isXLarge}
           cards={cards}
-          masteredIds={masteredIds}
+          masteredIds={activeMasteredIds}
           streak={streak}
           overallMastery={overallMastery}
         />
