@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useIsDesktop, useIsLarge, useIsXLarge } from './hooks/useBreakpoints';
+import { useMistakeLog } from './hooks/useMistakeLog';
 import HomeView from './components/views/HomeView';
 import MapView from './components/views/MapView';
 import StudyView from './components/views/StudyView';
@@ -27,6 +28,7 @@ export default function App() {
   const isDesktop = useIsDesktop();
   const isLarge = useIsLarge();
   const isXLarge = useIsXLarge();
+  const { logAttempt } = useMistakeLog();
 
   const [cards, setCards] = useState(() => {
     try {
@@ -80,6 +82,10 @@ export default function App() {
   const [flipped, setFlipped] = useState(false);
   const [answerTab, setAnswerTab] = useState('answer');
   const [cameFromMap, setCameFromMap] = useState(false);
+
+  // when set, scopes the study session to exactly these card ids instead of
+  // the active category — used for the Stats "top misses" review session
+  const [reviewIds, setReviewIds] = useState(null);
 
   // add card form
   const [showForm, setShowForm] = useState(false);
@@ -139,7 +145,9 @@ export default function App() {
   // filtered card order for the current category — shuffled (with a stable
   // seed, so it doesn't reorder on unrelated re-renders) when that setting is on
   const filtered = useMemo(() => {
-    const base = activeCategory === ALL_CATEGORY ? cards : cards.filter(c => c.category === activeCategory);
+    const base = reviewIds
+      ? cards.filter(c => reviewIds.includes(c.id))
+      : (activeCategory === ALL_CATEGORY ? cards : cards.filter(c => c.category === activeCategory));
     if (!settings.shuffle) return base;
     const arr = [...base];
     let seed = shuffleSeed || 1;
@@ -149,7 +157,7 @@ export default function App() {
       [arr[i], arr[j]] = [arr[j], arr[i]];
     }
     return arr;
-  }, [cards, activeCategory, settings.shuffle, shuffleSeed]);
+  }, [cards, activeCategory, reviewIds, settings.shuffle, shuffleSeed]);
 
   const currentCard = filtered[index] || filtered[0];
   const colors = currentCard ? getCat(currentCard.category) : getCat('Custom');
@@ -176,8 +184,10 @@ export default function App() {
     localStorage.setItem('fc_streak', JSON.stringify(newStreak));
   }, []);
 
-  // reset index on category change (and deal a fresh shuffle order)
-  useEffect(() => { setIndex(0); setFlipped(false); setShuffleSeed(s => s + 1); }, [activeCategory]);
+  // reset index on category change (and deal a fresh shuffle order); also
+  // exits an active "top misses" review session, since it was scoped to a
+  // specific set of card ids rather than this category
+  useEffect(() => { setIndex(0); setFlipped(false); setShuffleSeed(s => s + 1); setReviewIds(null); }, [activeCategory]);
 
   // reset to the Answer tab whenever the card changes
   useEffect(() => { setAnswerTab('answer'); }, [index, activeCategory]);
@@ -207,6 +217,7 @@ export default function App() {
   // know / don't know
   const markCard = (cardId, result) => {
     setResults(prev => ({ ...prev, [cardId]: result }));
+    logAttempt(cardId, result);
     if (result === 'know') {
       setMasteredIds(prev => prev.includes(cardId) ? prev : [...prev, cardId]);
     }
@@ -312,6 +323,17 @@ export default function App() {
   const backToMap = () => {
     setCameFromMap(false);
     setView(VIEWS.MAP);
+  };
+
+  // starts a study session scoped to a specific set of cards (e.g. the
+  // Stats "top misses" panel), rather than a whole category
+  const startReview = (missedCards) => {
+    setReviewIds(missedCards.map(c => c.id));
+    setResults({});
+    setIndex(0);
+    setFlipped(false);
+    setCameFromMap(false);
+    setView(VIEWS.STUDY);
   };
 
   // settings handlers
@@ -423,6 +445,7 @@ export default function App() {
           masteredIds={activeMasteredIds}
           streak={streak}
           overallMastery={overallMastery}
+          onStartReview={startReview}
         />
       )}
 

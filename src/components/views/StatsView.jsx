@@ -1,7 +1,8 @@
 import { CATEGORY_LIST, CATEGORY_EMOJI, getCat } from '../../constants/categories';
 import { INK, FONTS, RADII } from '../../constants/theme';
+import TopMissesPanel from './TopMissesPanel';
 
-export default function StatsView({ isDesktop, isLarge, isXLarge, accent, cards, masteredIds, streak, overallMastery }) {
+export default function StatsView({ isDesktop, isLarge, isXLarge, accent, cards, masteredIds, streak, overallMastery, onStartReview }) {
   return (
     <div style={{ maxWidth: isXLarge ? '960px' : isLarge ? '760px' : isDesktop ? '640px' : 'none', margin: isDesktop ? '0 auto' : '0' }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '12px', marginBottom: '18px' }}>
@@ -49,6 +50,10 @@ export default function StatsView({ isDesktop, isLarge, isXLarge, accent, cards,
             </div>
           );
         })}
+      </div>
+
+      <div style={{ background: INK.panel, border: `1px solid ${INK.hairline}`, borderRadius: RADII.panel, padding: '20px', marginTop: '18px' }}>
+        <TopMissesPanel cards={cards} accent={accent} onStartReview={onStartReview} />
       </div>
     </div>
   );
