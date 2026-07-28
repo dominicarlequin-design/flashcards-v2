@@ -19,8 +19,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL'; // e.g. https://xxxx.supabase.co
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const SUPABASE_URL = 'https://umvhxxqxvfboxvfghivz.supabase.co'; // e.g. https://xxxx.supabase.co
+const SUPABASE_ANON_KEY = 'sb_publishable__mdcJKN0--9O4FgQceoz1A_3B2g5Kmk';
 
 // A stable per-browser id, so attempts can be grouped per user without full auth yet.
 function getOrCreateUserId() {
