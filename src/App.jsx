@@ -10,11 +10,15 @@ import OnboardingView from './components/views/OnboardingView';
 import SettingsView from './components/views/SettingsView';
 import MotifBackground from './components/MotifBackground';
 import starterCards from './data/startercards';
+import constitutionalLawCards from './data/constitutionalLawCards';
 import { ALL_CATEGORY, LEVEL_ORDER, CATEGORY_LIST, getCat } from './constants/categories';
 import { INK, FONTS, PAGE_BG } from './constants/theme';
 import { VIEWS } from './constants/views';
 
 const ACCENT = INK.gold;
+
+// all built-in decks, merged into one starter set
+const allStarterCards = [...starterCards, ...constitutionalLawCards];
 
 const DEFAULT_SETTINGS = {
   shuffle: false,
@@ -33,18 +37,18 @@ export default function App() {
   const [cards, setCards] = useState(() => {
     try {
       const s = localStorage.getItem('fc_v5');
-      if (!s) return starterCards;
+      if (!s) return allStarterCards;
       const saved = JSON.parse(s);
       // always use the current starter card content (so app updates to built-in
       // cards show up), and keep any truly user-added custom cards on top —
       // dropping anything left over from a removed category (e.g. old starter
       // cards from a subject that's no longer offered)
-      const starterIds = new Set(starterCards.map(c => c.id));
+      const starterIds = new Set(allStarterCards.map(c => c.id));
       const validCategories = new Set([...CATEGORY_LIST, 'Custom']);
       const userAdded = saved.filter(c => !starterIds.has(c.id) && validCategories.has(c.category));
-      return [...starterCards, ...userAdded];
+      return [...allStarterCards, ...userAdded];
     }
-    catch { return starterCards; }
+    catch { return allStarterCards; }
   });
 
   // session results: { [cardId]: 'know' | 'dontknow' }
