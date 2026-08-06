@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useIsDesktop } from './hooks/useBreakpoints';
+import { useMistakeLog } from './hooks/useMistakeLog';
 import HomeView from './components/views/HomeView';
 import StudyView from './components/views/StudyView';
 import ResultsView from './components/views/ResultsView';
@@ -36,6 +37,7 @@ function PillarMark({ color, size = 22 }) {
 
 export default function App() {
   const isDesktop = useIsDesktop();
+  const { logAttempt } = useMistakeLog();
 
   const [view, setView] = useState(VIEWS.HOME);
 
@@ -82,6 +84,10 @@ export default function App() {
 
   const totalReviewed = useMemo(() => Object.values(history).reduce((a, b) => a + b, 0), [history]);
 
+  // shaped for TopMissesPanel.jsx, which expects { id, question } (it was
+  // written against the old term/question naming, kept as-is)
+  const cardsForMistakeLog = useMemo(() => ALL_CARDS.map(c => ({ id: c.id, question: c.term })), []);
+
   const last7Days = useMemo(() => {
     const days = [];
     for (let i = 6; i >= 0; i--) {
@@ -115,6 +121,7 @@ export default function App() {
     const cardId = sessionQueue[sessionIndex];
     setProgress(prev => ({ ...prev, [cardId]: review(prev[cardId] || newProgress(today), known, today) }));
     setHistory(prev => ({ ...prev, [today]: (prev[today] || 0) + 1 }));
+    logAttempt(cardId, known ? 'know' : 'dontknow');
     setSessionReviewed(n => n + 1);
     if (known) setSessionKnown(n => n + 1);
 
@@ -130,6 +137,9 @@ export default function App() {
       setSessionIndex(i => i + 1);
     }
   };
+
+  // starts a session scoped to exactly the cards TopMissesPanel returns
+  const onStartMissesReview = (missedCards) => startSession(missedCards.map(c => c.id));
 
   const onExitStudy = () => setView(VIEWS.HOME);
   const onDoneResults = () => setView(VIEWS.HOME);
@@ -155,7 +165,17 @@ export default function App() {
       case VIEWS.RESULTS:
         return <ResultsView reviewed={sessionReviewed} known={sessionKnown} onDone={onDoneResults} />;
       case VIEWS.PROGRESS:
-        return <ProgressView isDesktop={isDesktop} streakCount={streak.count} totalReviewed={totalReviewed} last7Days={last7Days} decks={decksForHome} />;
+        return (
+          <ProgressView
+            isDesktop={isDesktop}
+            streakCount={streak.count}
+            totalReviewed={totalReviewed}
+            last7Days={last7Days}
+            decks={decksForHome}
+            mistakeLogCards={cardsForMistakeLog}
+            onStartMissesReview={onStartMissesReview}
+          />
+        );
       case VIEWS.SETTINGS:
         return (
           <SettingsView

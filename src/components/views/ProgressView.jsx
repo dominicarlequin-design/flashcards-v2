@@ -1,8 +1,9 @@
 import { INK, FONTS, RADII, SHADOWS } from '../../constants/theme';
+import TopMissesPanel from './TopMissesPanel';
 
 const DAY_LETTERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
-export default function ProgressView({ isDesktop, streakCount, totalReviewed, last7Days, decks }) {
+export default function ProgressView({ isDesktop, streakCount, totalReviewed, last7Days, decks, mistakeLogCards, onStartMissesReview }) {
   return (
     <div className="scrolly" style={{ overflowY: 'auto', height: '100%' }}>
       <h1 style={{ fontFamily: FONTS.serif, fontSize: isDesktop ? '32px' : '26px', fontWeight: '600', color: INK.ink, margin: '0 0 22px' }}>Progress</h1>
@@ -53,6 +54,10 @@ export default function ProgressView({ isDesktop, streakCount, totalReviewed, la
             </div>
           </div>
         ))}
+      </div>
+
+      <div style={{ background: INK.panel, border: `1px solid ${INK.border}`, borderRadius: RADII.panel, boxShadow: SHADOWS.panel, padding: '20px', marginTop: '20px' }}>
+        <TopMissesPanel cards={mistakeLogCards} accent={INK.accent} onStartReview={onStartMissesReview} />
       </div>
     </div>
   );

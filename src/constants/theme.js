@@ -15,6 +15,20 @@ export const INK = {
   accentTint: '#A33B2E14',
   success: '#3F5D42',  // "known" swipe color
   danger: '#A33B2E',   // "unknown" swipe color (reuses primary accent)
+
+  // --- legacy aliases -----------------------------------------------------
+  // src/hooks/useMistakeLog.js and src/components/views/TopMissesPanel.jsx
+  // are kept as-is (not edited) per project note, and were written against
+  // the old dark "Ink & Gold" token names. These aliases let them render
+  // correctly against the current light parchment palette without touching
+  // either file.
+  gold: '#A33B2E',
+  cream: '#20201C',
+  dim: '#5B5648',
+  hairline: '#CCC5B4',
+  reviewText: '#A33B2E',
+  reviewBg: '#A33B2E14',
+  reviewBorder: '#A33B2E55',
 };
 
 // soft, large panel shadow + the accent-tinted glow behind the desktop layout
@@ -23,6 +37,8 @@ export const SHADOWS = {
   panelHover: '0 24px 48px -18px rgba(32,32,28,0.32), 0 4px 12px -2px rgba(32,32,28,0.1)',
   card: '0 30px 60px -24px rgba(32,32,28,0.35)',
   glow: (accent = INK.accent) => `radial-gradient(60% 50% at 50% 0%, ${accent}1c 0%, transparent 70%)`,
+  // legacy alias for TopMissesPanel.jsx (see INK's legacy-aliases note above)
+  goldButton: (accent = INK.accent) => `0 12px 30px -10px ${accent}66`,
 };
 
 export const FONTS = {
@@ -36,6 +52,8 @@ export const RADII = {
   pill: '10px',
   sm: '8px',
   circle: '50%',
+  // legacy alias for TopMissesPanel.jsx (see INK's legacy-aliases note above)
+  btn: '10px',
 };
 
 // One accent per deck — muted, harmonious "law library" tones, distinct from
