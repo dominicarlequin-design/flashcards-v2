@@ -1,87 +1,84 @@
-import { INK, FONTS, RADII } from '../../constants/theme';
+import { useState } from 'react';
+import { INK, FONTS, RADII, SHADOWS } from '../../constants/theme';
 
-const MOTIF_OPTIONS = [['law', 'Law'], ['scholar', 'Scholar'], ['minimal', 'Minimal'], ['off', 'Off']];
-const DENSITY_OPTIONS = [['sparse', 'Sparse'], ['normal', 'Normal'], ['dense', 'Dense']];
-
-function SegButton({ label, active, disabled, onClick }) {
+function ToggleRow({ title, desc, value, onToggle, last }) {
   return (
-    <button onClick={disabled ? undefined : onClick} className="fc-tap" style={{
-      flex: 1, fontFamily: FONTS.sans, padding: '9px 4px', borderRadius: RADII.pill,
-      border: `1px solid ${active ? INK.gold : INK.hairline}`,
-      background: active ? INK.gold : 'transparent',
-      color: disabled ? INK.faint : (active ? '#14120b' : INK.mutedGoldGrey),
-      fontSize: '11px', fontWeight: active ? '700' : '400', letterSpacing: '.5px',
-      cursor: disabled ? 'default' : 'pointer',
-    }}>{label}</button>
+    <div style={{
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0',
+      borderBottom: last ? 'none' : `1px solid ${INK.border}`,
+    }}>
+      <div style={{ paddingRight: '16px' }}>
+        <p style={{ fontFamily: FONTS.sans, fontSize: '14px', color: INK.ink, margin: 0, fontWeight: '600' }}>{title}</p>
+        <p style={{ fontFamily: FONTS.sans, fontSize: '12px', color: INK.inkMuted, margin: '3px 0 0' }}>{desc}</p>
+      </div>
+      <button onClick={onToggle} className="fc-tap" style={{
+        flexShrink: 0, width: '46px', height: '26px', borderRadius: '999px', border: 'none', cursor: 'pointer',
+        background: value ? INK.accent : INK.border, position: 'relative',
+      }}>
+        <span style={{
+          position: 'absolute', top: '3px', left: value ? '23px' : '3px', width: '20px', height: '20px',
+          borderRadius: RADII.circle, background: INK.panel, transition: 'left .2s',
+        }} />
+      </button>
+    </div>
   );
 }
 
-export default function SettingsView({
-  isDesktop, isLarge, isXLarge,
-  settings, onToggle, onMotifChange, onDensityChange,
-  resetProgress, justReset,
-}) {
-  const bgOff = settings.bgMotif === 'off';
+export default function SettingsView({ isDesktop, dailyGoal, onDailyGoalChange, remindersOn, onToggleReminders, soundOn, onToggleSound, onResetProgress }) {
+  const [confirming, setConfirming] = useState(false);
 
-  const toggleRows = [
-    { key: 'shuffle', title: 'Shuffle deck', desc: 'Draw cards in random order during a session.' },
-    { key: 'dailyReminder', title: 'Daily reminder', desc: 'A nudge to keep your streak alive.' },
-    { key: 'reduceMotion', title: 'Reduce motion', desc: 'Disable the card flip and background animation.' },
-  ];
+  const handleReset = () => {
+    onResetProgress();
+    setConfirming(false);
+  };
 
   return (
-    <div style={{ maxWidth: isXLarge ? '960px' : isLarge ? '760px' : isDesktop ? '640px' : 'none', margin: isDesktop ? '0 auto' : '0' }}>
-      <div style={{ background: INK.panel, border: `1px solid ${INK.hairline}`, borderRadius: RADII.panel, padding: '6px 20px', marginBottom: '18px' }}>
-        {toggleRows.map((row, i) => (
-          <div key={row.key} style={{
-            display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0',
-            borderBottom: i < toggleRows.length - 1 ? `1px solid ${INK.divider}` : 'none',
-          }}>
-            <div style={{ paddingRight: '16px' }}>
-              <p style={{ fontFamily: FONTS.sans, fontSize: '14px', color: INK.cream, margin: 0, fontWeight: '500' }}>{row.title}</p>
-              <p style={{ fontSize: '12px', color: INK.dim, margin: '3px 0 0', lineHeight: 1.4 }}>{row.desc}</p>
+    <div className="scrolly" style={{ overflowY: 'auto', height: '100%' }}>
+      <h1 style={{ fontFamily: FONTS.serif, fontSize: isDesktop ? '32px' : '26px', fontWeight: '600', color: INK.ink, margin: '0 0 22px' }}>Settings</h1>
+
+      <div style={{ background: INK.panel, border: `1px solid ${INK.border}`, borderRadius: RADII.panel, boxShadow: SHADOWS.panel, padding: '22px', marginBottom: '20px' }}>
+        <p style={{ fontFamily: FONTS.sans, fontSize: '11px', letterSpacing: '1.5px', textTransform: 'uppercase', color: INK.inkMuted, margin: '0 0 4px' }}>Daily goal</p>
+        <p style={{ fontFamily: FONTS.sans, fontSize: '12px', color: INK.inkMuted, margin: '0 0 16px' }}>How many cards you aim to review each day.</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <input
+            type="range" min="5" max="100" step="5" value={dailyGoal}
+            onChange={e => onDailyGoalChange(Number(e.target.value))}
+            style={{ flex: 1 }}
+          />
+          <span style={{ fontFamily: FONTS.serif, fontSize: '20px', fontWeight: '600', color: INK.accent, minWidth: '46px', textAlign: 'right' }}>{dailyGoal}</span>
+        </div>
+      </div>
+
+      <div style={{ background: INK.panel, border: `1px solid ${INK.border}`, borderRadius: RADII.panel, boxShadow: SHADOWS.panel, padding: '4px 22px', marginBottom: '20px' }}>
+        <ToggleRow title="Reminders" desc="A daily nudge to keep your streak alive." value={remindersOn} onToggle={onToggleReminders} />
+        <ToggleRow title="Sound" desc="Play a sound when you flip or grade a card." value={soundOn} onToggle={onToggleSound} last />
+      </div>
+
+      <div style={{ background: INK.panel, border: `1px solid ${INK.border}`, borderRadius: RADII.panel, boxShadow: SHADOWS.panel, padding: '22px' }}>
+        <p style={{ fontFamily: FONTS.sans, fontSize: '11px', letterSpacing: '1.5px', textTransform: 'uppercase', color: INK.inkMuted, margin: '0 0 6px' }}>Progress</p>
+        <p style={{ fontFamily: FONTS.sans, fontSize: '13px', color: INK.inkMuted, margin: '0 0 16px' }}>Resets every deck's box progress, due dates, streak, and review history. This can't be undone.</p>
+
+        {!confirming ? (
+          <button onClick={() => setConfirming(true)} className="fc-tap" style={{
+            fontFamily: FONTS.sans, padding: '12px 20px', borderRadius: RADII.pill, border: `1px solid ${INK.danger}66`,
+            background: `${INK.danger}14`, color: INK.danger, fontSize: '13px', fontWeight: '700', cursor: 'pointer',
+          }}>Reset progress</button>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <p style={{ fontFamily: FONTS.sans, fontSize: '13px', fontWeight: '700', color: INK.danger, margin: 0 }}>Are you sure? This can't be undone.</p>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button onClick={() => setConfirming(false)} className="fc-tap" style={{
+                flex: 1, fontFamily: FONTS.sans, padding: '12px', borderRadius: RADII.pill, border: `1px solid ${INK.border}`,
+                background: 'transparent', color: INK.inkMuted, fontSize: '13px', cursor: 'pointer',
+              }}>Cancel</button>
+              <button onClick={handleReset} className="fc-tap" style={{
+                flex: 1, fontFamily: FONTS.sans, padding: '12px', borderRadius: RADII.pill, border: 'none',
+                background: INK.danger, color: INK.panel, fontSize: '13px', fontWeight: '700', cursor: 'pointer',
+              }}>Yes, reset everything</button>
             </div>
-            <button onClick={() => onToggle(row.key)} className="fc-tap" style={{
-              flexShrink: 0, width: '46px', height: '26px', borderRadius: '999px', border: 'none', cursor: 'pointer',
-              background: settings[row.key] ? INK.gold : INK.hairline, position: 'relative', transition: 'background .2s',
-            }}>
-              <span style={{
-                position: 'absolute', top: '3px', left: settings[row.key] ? '23px' : '3px',
-                width: '20px', height: '20px', borderRadius: RADII.circle, background: INK.cream, transition: 'left .2s',
-              }} />
-            </button>
           </div>
-        ))}
+        )}
       </div>
-
-      <div style={{ background: INK.panel, border: `1px solid ${INK.hairline}`, borderRadius: RADII.panel, padding: '20px', marginBottom: '18px' }}>
-        <p style={{ fontFamily: FONTS.sans, fontSize: '11px', letterSpacing: '2px', textTransform: 'uppercase', color: INK.mutedGoldGrey, margin: '0 0 4px' }}>Background motifs</p>
-        <p style={{ fontSize: '12px', color: INK.dim, margin: '0 0 14px', lineHeight: 1.5 }}>Drifting law symbols behind the app. Animation follows your reduce-motion setting.</p>
-        <div style={{ display: 'flex', gap: '6px', marginBottom: '14px' }}>
-          {MOTIF_OPTIONS.map(([v, label]) => (
-            <SegButton key={v} label={label} active={settings.bgMotif === v} onClick={() => onMotifChange(v)} />
-          ))}
-        </div>
-        <p style={{ fontFamily: FONTS.sans, fontSize: '10px', letterSpacing: '1.5px', textTransform: 'uppercase', color: INK.dim, margin: '0 0 8px', opacity: bgOff ? .4 : 1 }}>Density</p>
-        <div style={{ display: 'flex', gap: '6px', opacity: bgOff ? .4 : 1 }}>
-          {DENSITY_OPTIONS.map(([v, label]) => (
-            <SegButton key={v} label={label} active={!bgOff && settings.bgDensity === v} disabled={bgOff} onClick={() => onDensityChange(v)} />
-          ))}
-        </div>
-      </div>
-
-      <div style={{ background: INK.panel, border: `1px solid ${INK.hairline}`, borderRadius: RADII.panel, padding: '20px', marginBottom: '18px' }}>
-        <p style={{ fontFamily: FONTS.sans, fontSize: '11px', letterSpacing: '2px', textTransform: 'uppercase', color: INK.mutedGoldGrey, margin: '0 0 6px' }}>Progress</p>
-        <p style={{ fontSize: '13px', color: INK.dim, margin: '0 0 16px', lineHeight: 1.5 }}>Resets mastery and the current session. Your cards are kept.</p>
-        <button onClick={resetProgress} className="fc-tap" style={{
-          fontFamily: FONTS.sans, padding: '11px 20px', borderRadius: RADII.nav, border: `1px solid ${INK.reviewBorder}`,
-          background: INK.reviewBg, color: INK.reviewText, fontSize: '12px', fontWeight: '600', letterSpacing: '.5px', cursor: 'pointer',
-        }}>{justReset ? '✓ Progress reset' : 'Reset progress'}</button>
-      </div>
-
-      <p style={{ fontFamily: FONTS.serif, fontStyle: 'italic', textAlign: 'center', color: INK.faint, fontSize: '13px', margin: '10px 0 0' }}>
-        Editorial Ink &amp; Gold · v2.1
-      </p>
     </div>
   );
 }

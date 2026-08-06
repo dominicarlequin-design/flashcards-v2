@@ -3,13 +3,18 @@
 }
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden; /* the app fits the viewport; each screen scrolls internally */
 }
 
 body {
-  margin: 0;
-  background: #0f0d08;
-  font-family: 'Archivo', system-ui, sans-serif;
+  background: #DAD5C8;
+  font-family: 'Source Sans 3', system-ui, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -17,10 +22,10 @@ body {
 }
 
 a {
-  color: #d4af37;
+  color: #A33B2E;
 }
 a:hover {
-  color: #e6c65a;
+  color: #8C3226;
 }
 
 h1, h2, h3, p {
@@ -29,52 +34,36 @@ h1, h2, h3, p {
 
 #root {
   width: 100%;
-  min-height: 100svh;
+  height: 100%;
   display: flex;
   flex-direction: column;
 }
 
-/* hides the scrollbar on horizontally-scrolling nav/pill rows */
-.scrollx {
+/* hides the scrollbar on horizontally-scrolling rows, and on the
+   internally-scrolling screen panels */
+.scrollx, .scrolly {
   scrollbar-width: none;
 }
-.scrollx::-webkit-scrollbar {
+.scrollx::-webkit-scrollbar, .scrolly::-webkit-scrollbar {
   display: none;
 }
 
-/* tap feedback for buttons/cards */
+/* hover lift + tap feedback for nav items, deck cards, and buttons */
 .fc-tap {
   cursor: pointer;
-  transition: transform .12s ease, border-color .2s ease, background .2s ease;
+  transition: transform .15s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;
 }
 .fc-tap:active {
   transform: scale(.98);
 }
+.fc-lift:hover {
+  transform: translateY(-2px);
+}
 
 input, textarea, select {
-  font-family: 'Archivo', sans-serif;
+  font-family: 'Source Sans 3', sans-serif;
 }
 
-/* animated background motif layer */
-.fc-bg {
-  position: fixed;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-  z-index: 0;
-}
-.fc-bg span {
-  position: absolute;
-  font-family: 'Spectral', serif;
-  color: #d4af37;
-  user-select: none;
-  will-change: transform;
-}
-@keyframes fcDrift {
-  0%   { transform: translateY(14px) rotate(-4deg); }
-  50%  { transform: translateY(-14px) rotate(4deg); }
-  100% { transform: translateY(14px) rotate(-4deg); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .fc-bg span { animation: none !important; }
+input[type="range"] {
+  accent-color: #A33B2E;
 }
